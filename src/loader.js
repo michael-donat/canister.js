@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = class Loader {
-	constructor (root) {
+	constructor(root) {
 		this.root = root;
 	}
 
@@ -17,7 +17,8 @@ module.exports = class Loader {
 		return path.join(this.root, module);
 	}
 
-	loadModule (module) {
+	loadModule(module) {
+		// eslint-disable-next-line import/no-dynamic-require
 		return require(this.path(module));
- 	}
-}
+	}
+};

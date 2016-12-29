@@ -6,26 +6,6 @@ class Definition {
 	get id() {
 		return this._id;
 	}
-
-	isValue() {
-		return this instanceof ValueDefinition;
-	}
-
-	isParameter() {
-		return this instanceof ParameterDefinition;
-	}
-
-	isClass() {
-		return this instanceof ClassDefinition;
-	}
-
-	isModule() {
-		return this instanceof ModuleDefinition;
-	}
-
-	isProperty() {
-		return this instanceof PropertyDefinition;
-	}
 }
 
 class ValueDefinition extends Definition {
@@ -49,10 +29,10 @@ class PropertyDefinition extends Definition {
 
 class ClassDefinition extends Definition {
 	isTransient() {
-		return !!this.transient;
+		return Boolean(this.transient);
 	}
 	constructWith(...args) {
-		if(args.filter((a) => !(a instanceof Definition)).length > 0) {
+		if (args.filter(a => !(a instanceof Definition)).length > 0) {
 			throw new Error(`Unexpected constructor value for definition '${this.id}', expected an instance of Definition`);
 		}
 		this.args = args;
@@ -67,30 +47,50 @@ class ClassDefinition extends Definition {
 	}
 }
 
-Definition.value = function(value) {
+Definition.prototype.isValue = function () {
+	return this instanceof ValueDefinition;
+};
+
+Definition.prototype.isParameter = function () {
+	return this instanceof ParameterDefinition;
+};
+
+Definition.prototype.isClass = function () {
+	return this instanceof ClassDefinition;
+};
+
+Definition.prototype.isModule = function () {
+	return this instanceof ModuleDefinition;
+};
+
+Definition.prototype.isProperty = function () {
+	return this instanceof PropertyDefinition;
+};
+
+Definition.value = function (value) {
 	return new ValueDefinition(value);
 };
 
-Definition.parameter = function(id, value) {
+Definition.parameter = function (id, value) {
 	const definition = new ParameterDefinition(id);
 	definition.value = value;
 	return definition;
 };
 
-Definition.module = function(id, module) {
+Definition.module = function (id, module) {
 	const definition = new ModuleDefinition(id);
 	definition.module = module;
 	return definition;
 };
 
-Definition.property = function(id, property, module) {
+Definition.property = function (id, property, module) {
 	const definition = new PropertyDefinition(id);
 	definition.property = property;
 	definition.module = module;
 	return definition;
 };
 
-Definition.class = function(id, klass, module, transient) {
+Definition.class = function (id, klass, module, transient) {
 	const definition = new ClassDefinition(id);
 	definition.class = klass;
 	definition.module = module;
@@ -98,7 +98,7 @@ Definition.class = function(id, klass, module, transient) {
 	return definition;
 };
 
-Definition.reference = function(id) {
+Definition.reference = function (id) {
 	return new Definition(id);
-}
+};
 module.exports = Definition;

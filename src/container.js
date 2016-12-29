@@ -1,11 +1,10 @@
 module.exports = class Container {
-	constructor () {
+	constructor() {
 		this.registry = {};
 	}
 
 	get(name) {
-
-		if (!this.registry.hasOwnProperty(name)) {
+		if (!Object.prototype.hasOwnProperty.call(this.registry, name)) {
 			throw new Error('Unrecognised component: ' + name);
 		}
 
@@ -14,14 +13,12 @@ module.exports = class Container {
 		return component.__canisterBuilderProxy ? component(this) : component;
 	}
 
-
 	register(name, value) {
-
 		if (Object.isFrozen(this)) {
 			throw new Error('Container is locked, can\'t register any more components');
 		}
 
-		if (this.registry.hasOwnProperty(name)) {
+		if (Object.prototype.hasOwnProperty.call(this.registry, name)) {
 			throw new Error(`Component (${name}) already registered.`);
 		}
 

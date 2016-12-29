@@ -1,6 +1,6 @@
+const fs = require('fs');
 const yaml = require('js-yaml');
 const merge = require('merge');
-const fs = require('fs');
 
 module.exports = class YamlLoader {
 	constructor() {
@@ -12,7 +12,7 @@ module.exports = class YamlLoader {
 		try {
 			const file = fs.readFileSync(filePath);
 			this.merge(yaml.safeLoad(file, {filename: filePath}));
-		} catch(err) {
+		} catch (err) {
 			const error = new Error(`Error while parsing YAML file: ${err.message}`);
 			error.previous = err;
 			throw error;
@@ -22,7 +22,7 @@ module.exports = class YamlLoader {
 	fromString(string) {
 		try {
 			this.merge(yaml.safeLoad(string));
-		} catch(err) {
+		} catch (err) {
 			const error = new Error(`Error while parsing YAML string: ${err.message}`);
 			error.previous = err;
 			throw error;

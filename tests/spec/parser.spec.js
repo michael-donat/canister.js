@@ -9,8 +9,7 @@ describe('Parser', function() {
 
 		const definition = parser.parse().next().value;
 
-		expect(definition).to.be.an.instanceOf(Definition);
-		expect(definition).to.be.eql({_id: 'param', value: 'value'})
+		expect(definition).to.be.eql(Definition.parameter('param', 'value'));
 	});
 
 	it('parses modules', function() {
@@ -20,8 +19,7 @@ describe('Parser', function() {
 
 		const definition = parser.parse().next().value;
 
-		expect(definition).to.be.an.instanceOf(Definition);
-		expect(definition).to.be.eql({_id: 'my.module', module: 'lib/smth'})
+		expect(definition).to.be.eql(Definition.module('my.module', 'lib/smth'));
 	});
 
 	it('parses properties', function() {
@@ -31,8 +29,7 @@ describe('Parser', function() {
 
 		const definition = parser.parse().next().value;
 
-		expect(definition).to.be.an.instanceOf(Definition);
-		expect(definition).to.be.eql({_id: 'my.prop', module: 'lib/smth', property: 'A'})
+		expect(definition).to.be.eql(Definition.property('my.prop', 'A', 'lib/smth'));
 	});
 
 	it('parses classes', function() {
@@ -42,8 +39,7 @@ describe('Parser', function() {
 
 		const definition = parser.parse().next().value;
 
-		expect(definition).to.be.an.instanceOf(Definition);
-		expect(definition).to.be.eql({_id: 'my.class', module: 'lib/smth', class: 'B', transient: true})
+		expect(definition).to.be.eql(Definition.class('my.class', 'B', 'lib/smth', true));
 	});
 
 	it('parses classes with value constructor params', function() {
@@ -59,33 +55,26 @@ describe('Parser', function() {
 		const definition = parser.parse().next().value;
 
 		expect(definition).to.be.an.instanceOf(Definition);
-		expect(definition).to.be.eql({
-			_id: 'my.class',
-			module: 'lib/smth',
-			class: 'B',
-			transient: false,
-			args: [
-				Definition.value(1),Definition.value(2),Definition.value(3)
-			]
-		})
+
+		const compare = Definition.class('my.class', 'B', 'lib/smth', false);
+		compare.constructWith(Definition.value(1),Definition.value(2),Definition.value(3));
+
+		expect(definition).to.be.eql(compare);
+
 	})
 
 	it('parses classes where module is a class', function() {
 		const parser = new Parser({
-			components: { 'my.class': {
-				class: 'lib/smth'
-			} }
+			components: {
+				'my.class': {
+					class: 'lib/smth'
+				}
+			}
 		});
 
 		const definition = parser.parse().next().value;
-		expect(definition).to.be.an.instanceOf(Definition);
-		expect(definition).to.be.eql({
-			_id: 'my.class',
-			module: 'lib/smth',
-			class: null,
-			transient: false
-		})
-	})
+		expect(definition).to.be.eql(Definition.class('my.class', null, 'lib/smth', false));
+	});
 
 	it('parses classes with reference constructor params', function() {
 		const parser = new Parser({
@@ -98,16 +87,10 @@ describe('Parser', function() {
 		});
 
 		const definition = parser.parse().next().value;
+		const compare = Definition.class('my.class', 'B', 'lib/smth', false);
+		compare.constructWith(Definition.reference('dependency'));
 
-		expect(definition).to.be.an.instanceOf(Definition);
-		expect(definition).to.be.eql({
-			_id: 'my.class',
-			module: 'lib/smth',
-			class: 'B',
-			transient: false,
-			args: [
-				Definition.reference('dependency')
-			]
-		})
+
+		expect(definition).to.be.eql(compare);
 	})
 })
