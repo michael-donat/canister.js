@@ -1,6 +1,4 @@
-# Canister.js 
-
-Simple dependency injection container fronted with yaml configuration.
+# Canister.js [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)]() [![Build Status](https://img.shields.io/travis/michael-donat/canister.js.svg?style=flat-square)](https://travis-ci.org/michael-donat/canister.js)
  
 ## Requirements
 
@@ -19,7 +17,7 @@ npm install --save canister.js
 Canister.js provides a simplistic bootstrap method as its default export, it will take a path to yaml config as well as the root dir of your modules (or assume `process.cwd()` if not provided). 
 
 ```node
-const container = require('canister')(
+const container = require('canister.js')(
 	'./path/to/my/config.yml',
 	__dirname
 );
@@ -31,7 +29,7 @@ container.get('reference');
 If you require more control over configuration, you can assemble the container yourself using the exposed API, below will achieve the same result as the bootstrap above:
 
 ```node
-const canister = require('canister');
+const canister = require('canister.js');
 const moduleLoader = new canister.ModuleLoader(__dirname);
 const builder = new canister.Builder(moduleLoader);
 const yamlLoader = new canister.definitionLoader.YAML();
