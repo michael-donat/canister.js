@@ -11,7 +11,7 @@ module.exports = class Container {
 
 		const component = this.registry[name];
 
-		return typeof(component) === 'function' ? component(this) : component;
+		return component.__canisterBuilderProxy ? component(this) : component;
 	}
 
 

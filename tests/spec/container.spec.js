@@ -15,9 +15,11 @@ describe('Container', function() {
 		expect(this.container.get('a')).to.equal(this.container.get('a'));
 	});
 
-	it('invokes value on each get if value is a function', function() {
+	it('invokes value on each get if value is a builder function', function() {
 		let a = 0;
-		this.container.register('a', () => { return ++a; });
+		const builderFunction = () => { return ++a; };
+		builderFunction.__canisterBuilderProxy = true;
+		this.container.register('a', builderFunction);
 
 		expect(this.container.get('a')).to.equal(1);
 		expect(this.container.get('a')).to.equal(2);

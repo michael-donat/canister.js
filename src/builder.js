@@ -30,7 +30,12 @@ module.exports = class Builder extends EventEmitter {
 
 	__buildClass(definition) {
 		let module = this.loader.loadModule(definition.module);
+
 		let klass = module[definition.class];
+
+		if (!klass) {
+			throw new Error(`Can't find class '${definition.class}' in module '${definition.module}' for definition '${definition.id}'`)
+		}
 
 		let getParams = () => [];
 
@@ -45,6 +50,8 @@ module.exports = class Builder extends EventEmitter {
 		}
 
 		let constructorFunction = function(container) { return new klass(...getParams(container)); };
+		constructorFunction.__canisterBuilderProxy = true;
+
 		let returnFunction = constructorFunction;
 
 		if (definition.isTransient()) {
@@ -92,11 +99,31 @@ module.exports = class Builder extends EventEmitter {
 					container.register(definition.id, this.__buildClass(definition)(container));
 					break;
 				case definition.isModule():
-					container.register(definition.id, this.loader.loadModule(definition.module));
+					try {
+						container.register(definition.id, this.loader.loadModule(definition.module));
+					} catch (err) {
+						const error = new Error(`Can't load module '${definition.module}' for definition '${definition.id}'`);
+						error.previous = err;
+						throw error;
+					}
 					break;
 				case definition.isProperty():
-					const module = this.loader.loadModule(definition.module);
-					container.register(definition.id, module[definition.property]);
+					let loadedModule;
+					try {
+						loadedModule = this.loader.loadModule(definition.module);
+					} catch (err) {
+						const error = new Error(`Can't load module '${definition.module}' for definition '${definition.id}'`);
+						error.previous = err;
+						throw error;
+					}
+
+					let property = loadedModule[definition.property];
+
+					if (property === undefined) {
+						throw new Error(`Can't locate property '${definition.property}' from module '${definition.module}' for definition '${definition.id}'`);
+					}
+
+					container.register(definition.id, property);
 					break;
 				default:
 					throw new Error(`Unsupported definition type for '${definition.id}'`);

@@ -1,0 +1,18 @@
+parameters:
+  my.parameter: parameterValue
+components:
+  my.module: {module: ./fixture}
+  my.property: {property: ./fixture::A}
+  my.property.class: {property: ./fixture::SomeClass }
+  my.singleton:
+    class: ./fixture::SomeClass
+    with:
+      - string value
+      - 123
+      - '@my.property'
+      - '@my.parameter'
+  my.instance:
+    class: ./fixture::SomeClass
+    transient: true
+
+
