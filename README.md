@@ -1,4 +1,4 @@
-# Canister.js
+# Canister.js 
 
 Simple dependency injection container fronted with yaml configuration.
  
@@ -16,7 +16,7 @@ npm install --save canister.js
 
 ## Usage
 
-Canister.js provides a simplistic bootstrap method as it's default export, it will take a path to your yaml config file as well as the you module root (or assume `process.cwd()` if not provided). 
+Canister.js provides a simplistic bootstrap method as its default export, it will take a path to yaml config as well as the root dir of your modules (or assume `process.cwd()` if not provided). 
 
 ```node
 const container = require('canister')(
@@ -44,12 +44,12 @@ for (let definition of parser.parse()) {
 	builder.addDefinition(definition);
 }
 
-const constainer = builder.build();
+const container = builder.build();
 ```
 
 ## Configuration
 
-Currently, only yml configuration is supported, please to refer to following examples on the allowed schema.
+Currently, only yml configuration is supported, following examples cover allowed schema.
 
 ### Registering parameters (flat config values)
 
@@ -90,9 +90,9 @@ components:
 		transient: true
 ```
 
-Where a class is the only export from a module you provide the module path as the value of the `class` key.
+Where a class is the only export from a module you need to provide the module path as the sole value of `class` key.
 
-By default, the container will only ever return the same instance of a Class on each request, to change that behaviour an instantiate it on each call you need to provide the `transient: true` flag
+By default, the container will only ever return the same instance of a Class on each request, to change that behaviour you need to provide the `transient: true` flag.
 
 #### Constructor arguments
 
@@ -107,19 +107,19 @@ components:
 		  	  - 2
 ```
 
-Above will result in an invocation equivalent to `new ClassName('first argument', 2, [1, 2])`.
+Above will result in an invocation equivalent to `new require('./module').ClassName)('first argument', 2, [1, 2])`.
  
 Classes with constructor arguments can also be transient.
 
 ### Referencing other components
 
-Class arguments can reference another component registered in the container. To do this, you need to prefix key value with `@`
+Class arguments can reference another component registered in the container. To do this, you need to prefix reference name with `@`
 
 ```yml
 parameters:
 	db.host: mongodb://localhost
 components:
-	db.connection
+	db.connection:
 		class: ./db
 		with:
 			- '@db.host'
@@ -130,3 +130,13 @@ components:
 ```
 
 Canister will build components using an order obtained from dependency graph, if cyclic dependency is detected it will fail hard during build phase.
+
+## Contributing
+
+All contributions are more than welcome. Fork and PR not forgetting about linting and testing.
+
+## License
+
+MIT
+
+
