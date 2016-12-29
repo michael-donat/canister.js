@@ -129,6 +129,12 @@ components:
 
 Canister will build components using an order obtained from dependency graph, if cyclic dependency is detected it will fail hard during build phase.
 
+## Usage
+
+One the container is built, it will be frozen so no further modifications are possible.
+
+The only method exposed by container is `get(key)` which returns value under requested key.
+
 ## Contributing
 
 All contributions are more than welcome. Fork and PR not forgetting about linting and testing.
