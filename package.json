@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "dependency-graph": "^0.5.0",
+    "js-yaml": "^3.7.0",
+    "merge": "^1.2.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "sinon": "^1.17.6",
+    "sinon-chai": "^2.8.0",
+    "uuid": "^3.0.1",
+    "xo": "^0.17.1"
+  }
+}
