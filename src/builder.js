@@ -29,9 +29,13 @@ module.exports = class Builder extends EventEmitter {
 	}
 
 	__buildClass(definition) {
-		let module = this.loader.loadModule(definition.module);
-
-		let klass = module[definition.class];
+		let loadedModule = this.loader.loadModule(definition.module);
+		let klass;
+		if (!definition.class) {
+			klass = loadedModule
+		} else {
+			klass = loadedModule[definition.class];
+		}
 
 		if (!klass) {
 			throw new Error(`Can't find class '${definition.class}' in module '${definition.module}' for definition '${definition.id}'`)

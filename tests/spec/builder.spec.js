@@ -5,10 +5,16 @@ const uuid = require('uuid');
 
 const testClassModule = {
 	TestClass: class TestClass { constructor(...args) { this.args = args; this.id = uuid.v1();}},
-	prop: 1
+	prop: 1,
 };
+
+const ExportClass = class {
+
+}
+
 const stubMap = {
-	'test.class': testClassModule
+	'test.class': testClassModule,
+	'export.class': ExportClass
 }
 
 class StubLoader {
@@ -71,6 +77,18 @@ describe('Builder', function() {
 
 		expect(instanceA).to.be.an.instanceOf(stubMap['test.class'].TestClass);
 		expect(instanceB).to.be.an.instanceOf(stubMap['test.class'].TestClass);
+	});
+
+	it('builds module as Class instance', function() {
+		this.builder.addDefinition(Definition.class('a', null, 'export.class'));
+
+		const container = this.builder.build();
+
+		const instance = container.get('a');
+
+		expect(instance).to.equal(container.get('a'));
+
+		expect(instance).to.be.an.instanceOf(stubMap['export.class']);
 	})
 
 	it('builds Class instance with constructor parameters', function() {

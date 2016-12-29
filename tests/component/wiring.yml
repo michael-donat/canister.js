@@ -14,5 +14,13 @@ components:
   my.instance:
     class: ./fixture::SomeClass
     transient: true
-
+  my.module.class.singleton:
+    class: ./class
+    with:
+      - string value
+  my.module.class.instance:
+    class: ./class
+    with:
+      - string value
+    transient: true
 

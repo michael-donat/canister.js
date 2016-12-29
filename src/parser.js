@@ -22,7 +22,16 @@ module.exports = class Parser {
 				yield Definition.property(id, prop, module)
 			}
 			if (value.class) {
-				let [ , module, klass ] = value.class.match(/(.*?)::(.*)/);
+				let match = value.class.match(/(.*?)::(.*)/);
+				let module = null;
+				let klass = null;
+
+				if (!match) {
+					module = value.class;
+				} else {
+					[, module, klass] = match;
+				}
+
 				let definition = Definition.class(id, klass, module, !!value.transient);
 				if (value.with) {
 					let params = value.with.map((v) => {

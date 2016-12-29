@@ -70,6 +70,23 @@ describe('Parser', function() {
 		})
 	})
 
+	it('parses classes where module is a class', function() {
+		const parser = new Parser({
+			components: { 'my.class': {
+				class: 'lib/smth'
+			} }
+		});
+
+		const definition = parser.parse().next().value;
+		expect(definition).to.be.an.instanceOf(Definition);
+		expect(definition).to.be.eql({
+			_id: 'my.class',
+			module: 'lib/smth',
+			class: null,
+			transient: false
+		})
+	})
+
 	it('parses classes with reference constructor params', function() {
 		const parser = new Parser({
 			components: { 'my.class': {

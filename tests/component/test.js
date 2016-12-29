@@ -1,6 +1,7 @@
 const canister = require('./../../index');
 const path = require('path');
 const fixtures = require('./fixture');
+const classFixture = require('./class');
 
 describe('Canister.js', function() {
 	it('can build container from yml config file', function() {
@@ -35,5 +36,17 @@ describe('Canister.js', function() {
 		expect(instance).to.not.be.equal(container.get('my.instance'));
 
 		expect(container.get('my.property.class')).to.equal(fixtures.SomeClass);
+
+		const singletonFromModule = container.get('my.module.class.singleton');
+
+		expect(singletonFromModule).to.be.an.instanceOf(classFixture);
+		expect(singletonFromModule).to.be.equal(container.get('my.module.class.singleton'));
+		expect(singletonFromModule.args).to.be.eql([
+			'string value'
+		]);
+
+		const instanceFromModule = container.get('my.module.class.instance');
+		expect(instanceFromModule).to.not.be.equal(container.get('my.module.class.instance'));
+
 	})
 })
