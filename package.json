@@ -31,7 +31,7 @@
     "dependency injection",
     "container",
     "DiC",
-    "inversion of control",
+    "inversion of control"
   ],
   "author": "Michael Donat <michael.donat@me.com>",
   "license": "MIT",
