@@ -23,4 +23,8 @@ components:
     with:
       - string value
     transient: true
+  node.path:
+    module: path
+  node.path.join:
+      property: path::join
 

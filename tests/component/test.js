@@ -48,5 +48,8 @@ describe('Canister.js', function() {
 		const instanceFromModule = container.get('my.module.class.instance');
 		expect(instanceFromModule).to.not.be.equal(container.get('my.module.class.instance'));
 
+		expect(container.get('node.path')).to.be.equal(path);
+
+		expect(container.get('node.path.join')).to.be.equal(path.join);
 	})
 })
