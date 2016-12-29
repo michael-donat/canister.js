@@ -12,7 +12,7 @@
     "uuid": "^3.0.1",
     "xo": "^0.17.1"
   },
-  "name": "canister.js",
+  "name": "canister",
   "version": "1.0.0",
   "description": "A nodejs Dependency Injection Container implementation.",
   "main": "index.js",
