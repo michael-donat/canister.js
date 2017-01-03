@@ -9,3 +9,12 @@ module.exports.SomeClass = class {
 
 
 module.exports.A = 'prop.A.value';
+
+module.exports.TaggedClass = class {
+	setA(a) {
+		this.a = a;
+	}
+	setB(...b) {
+		this.b = b;
+	}
+}

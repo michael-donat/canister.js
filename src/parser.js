@@ -5,6 +5,19 @@ module.exports = class Parser {
 		this.dictionary = dictionary;
 	}
 
+	__parseArgs(args) {
+		if (!args) {
+			return [];
+		}
+
+		return args.map(v => {
+			if (/^@/.test(v)) {
+				return Definition.reference(v.replace(/^@/, ''));
+			}
+			return Definition.value(v);
+		});
+	}
+
 	* parse() {
 		for (let id in this.dictionary.parameters) {
 			if (Object.prototype.hasOwnProperty.call(this.dictionary.parameters, id)) {
@@ -15,14 +28,15 @@ module.exports = class Parser {
 
 		for (var id in this.dictionary.components) {
 			if (Object.prototype.hasOwnProperty.call(this.dictionary.components, id)) {
+				let yieldValue = null;
 				let value = this.dictionary.components[id];
 				if (value.module) {
 					let {module} = value;
-					yield Definition.module(id, module);
+					yieldValue = Definition.module(id, module);
 				}
 				if (value.property) {
 					let [, module, prop] = value.property.match(/(.*?)::(.*)/);
-					yield Definition.property(id, prop, module);
+					yieldValue = Definition.property(id, prop, module);
 				}
 				if (value.class) {
 					let match = value.class.match(/(.*?)::(.*)/);
@@ -35,16 +49,28 @@ module.exports = class Parser {
 
 					let definition = Definition.class(id, klass, module, Boolean(value.transient));
 					if (value.with) {
-						let params = value.with.map(v => {
-							if (/^@/.test(v)) {
-								return Definition.reference(v.replace(/^@/, ''));
-							}
-							return Definition.value(v);
-						});
-						definition.constructWith(...params);
+						definition.constructWith(...this.__parseArgs(value.with));
 					}
-					yield definition;
+					yieldValue = definition;
+
+					if (value.call) {
+						value.call.forEach(call => {
+							yieldValue.addCall(
+								Definition.call(call.method, ...this.__parseArgs(call.with))
+							);
+						});
+					}
 				}
+
+				if (value.tags) {
+					for (let name in value.tags) {
+						if (Object.prototype.hasOwnProperty.call(value.tags, name)) {
+							yieldValue.addTag(Definition.tag(name, value.tags[name]));
+						}
+					}
+				}
+
+				yield yieldValue;
 			}
 		}
 	}

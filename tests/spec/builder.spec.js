@@ -4,7 +4,10 @@ const Definition = require('./../../src/definition');
 const uuid = require('uuid');
 
 const testClassModule = {
-	TestClass: class TestClass { constructor(...args) { this.args = args; this.id = uuid.v1();}},
+	TestClass: class TestClass {
+		constructor(...args) { this.args = args; this.id = uuid.v1(); this.vals = {}};
+		setValue(key, val) { this.vals[key] = val;}
+	},
 	prop: 1,
 };
 
@@ -166,5 +169,46 @@ describe('Builder', function() {
 		this.builder.addDefinition(definitionB);
 
 		expect(()=>this.builder.build()).to.throw();
+	});
+
+	it('calls methods on returned value', function() {
+
+		const definitionA = Definition.class('a', 'TestClass', 'test.class', true);
+		const definitionB = Definition.class('b', 'TestClass', 'test.class');
+
+		definitionA.addCall(Definition.call('setValue', Definition.value('a'), Definition.value(1)));
+		definitionA.addCall(Definition.call('setValue', Definition.value('b'), Definition.reference('b')));
+
+		this.builder.addDefinition(definitionA);
+		this.builder.addDefinition(definitionB);
+
+		const container = this.builder.build();
+
+		const instance = container.get('a');
+
+		expect(instance.vals['a']).to.equal(1);
+		expect(instance.vals['b']).to.equal(container.get('b'));
+
+	});
+
+	it('returns definitions by id', function() {
+		const definition = Definition.parameter('a', 1);
+
+		this.builder.addDefinition(definition);
+
+		expect(this.builder.getDefinitionById(('a'))).to.equal(definition);
+	});
+
+	it('throws when unknown definition requested', function() {
+		expect(()=>this.builder.getDefinitionById('unknown')).to.throw(/Unknown definition/);
+	});
+
+	it('returns definitions by tag', function() {
+		const definition = Definition.parameter('a', 1);
+		definition.addTag(Definition.tag('tag'));
+
+		this.builder.addDefinition(definition);
+
+		expect(this.builder.getDefinitionsByTag('tag')).to.eql([definition]);
 	})
 })

@@ -92,5 +92,45 @@ describe('Parser', function() {
 
 
 		expect(definition).to.be.eql(compare);
+	});
+
+	it('parses tags', function() {
+		const parser = new Parser({
+			components: { 'my.class': {
+				class: 'lib/smth::B',
+				tags: {name: 'value', otherName: 'otherValue'}
+			} }
+		});
+
+		const definition = parser.parse().next().value;
+
+		expect(definition.tags).to.eql([
+			Definition.tag('name', 'value'),
+			Definition.tag('otherName', 'otherValue')
+		])
+	});
+
+	it('parses method calls', function() {
+		const parser = new Parser({
+			components: { 'my.class': {
+				class: 'lib/smth::B',
+				call:[
+					{method: 'A'},
+					{method: 'B', with: [1,2,'@dependency']}
+				]
+			} }
+		});
+
+		const definition = parser.parse().next().value;
+
+		expect(definition.calls).to.eql([
+			Definition.call('A'),
+			Definition.call(
+				'B',
+				Definition.value(1),
+				Definition.value(2),
+				Definition.reference('dependency')
+			)
+		])
 	})
 })

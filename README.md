@@ -18,9 +18,9 @@ Canister.js provides a simplistic bootstrap method as its default export, it wil
 
 ```node
 const container = require('canister.js')(
-	'./path/to/my/config.yml',
-	__dirname
-);
+  './path/to/my/config.yml',
+  __dirname
+).build();
 
 container.get('reference');
 
@@ -39,7 +39,7 @@ yamlLoader.fromFile('./path/to/my/config.yml');
 const parser = new canister.Parser(yamlLoader.toJS());
 
 for (let definition of parser.parse()) {
-	builder.addDefinition(definition);
+  builder.addDefinition(definition);
 }
 
 const container = builder.build();
@@ -53,39 +53,39 @@ Currently, only yml configuration is supported, following examples cover allowed
 
 ```yml
 parameters:
-	my.parameter.name: "string value"
+  my.parameter.name: "string value"
 ```
 
 ### Registering module as component
 
 ```yml
 components:
-	my.bespoke.module: { module: './relative/to/given/root' }
-	my.node.module:
-		module: http
-	my.absolute.module:
-		module: /absolute/path/to/a/module
+  my.bespoke.module: { module: './relative/to/given/root' }
+  my.node.module:
+    module: http
+  my.absolute.module:
+    module: /absolute/path/to/a/module
 ```
 
 ### Pulling a property from a module
 
 ```yml
 components:
-	my.module.property: { property: './module::PropertyName' }
-	my.node.property:
-		property: 'path::join'
+  my.module.property: { property: './module::PropertyName' }
+  my.node.property:
+    property: 'path::join'
 ```
 
 ### Registering Classes
 
 ```yml
 components:
-	my.class.as.only.export: {class: './module' }
-	my.class:
-		class: './module::ClassName'
-	my.instances:
-		class: './module::OtherClass'
-		transient: true
+  my.class.as.only.export: {class: './module' }
+  my.class:
+    class: './module::ClassName'
+  my.instances:
+    class: './module::OtherClass'
+    transient: true
 ```
 
 Where a class is the only export from a module you need to provide the module path as the sole value of `class` key.
@@ -96,18 +96,31 @@ By default, the container will only ever return the same instance of a Class on 
 
 ```yml
 components:
-	my.class:
-		class: ./module::ClassName
-		with:
-			- first argument
-			- 2
-			- - 1
-		  	  - 2
+  my.class:
+    class: ./module::ClassName
+    with:
+      - first argument
+      - 2
+      - - 1
+        - 2
 ```
 
 Above will result in an invocation equivalent to `new require('./module').ClassName)('first argument', 2, [1, 2])`.
  
 Classes with constructor arguments can also be transient.
+
+### Calling methods before returning an instance
+
+```yml
+components:
+  my.class:
+    class: ./module::ClassName
+    call:
+      - method: setValue
+        with:
+          - key
+          - value
+```
 
 ### Referencing other components
 
@@ -115,19 +128,33 @@ Class arguments can reference another component registered in the container. To 
 
 ```yml
 parameters:
-	db.host: mongodb://localhost
+  db.host: mongodb://localhost
 components:
-	db.connection:
-		class: ./db
-		with:
-			- '@db.host'
-	user.repository:
-		class: ./repository::User
-		with:
-			- '@db.connection'
+  db.connection:
+    class: ./db
+    with:
+      - '@db.host'
+  user.repository:
+    class: ./repository::User
+    with:
+      - '@db.connection'
 ```
 
 Canister will build components using an order obtained from dependency graph, if cyclic dependency is detected it will fail hard during build phase.
+
+### Tagging
+
+```yml
+components:
+  my.class:
+    class: ./module::ClassName
+    tags:
+      myTagName: myTagValue
+      'my tag name': 'my tag value'
+```
+
+By using tags you can dynamically modify definitions held by the builder before the container is built. 
+This allows for 'dynamic' service composition as illustrated by [this](examples/tagging) example. 
 
 ## Usage
 

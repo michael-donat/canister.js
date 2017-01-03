@@ -7,7 +7,7 @@ const canister = function canister(configPath, root) {
 	const builder = new canister.Builder(moduleLoader);
 	const yamlLoader = new canister.definitionLoader.YAML();
 
-	yamlLoader.fromFile(config);
+	yamlLoader.fromFile(configPath);
 
 	const parser = new canister.Parser(yamlLoader.toJS());
 
@@ -15,9 +15,10 @@ const canister = function canister(configPath, root) {
 		builder.addDefinition(definition);
 	}
 
-	return builder.build();
+	return builder;
 }
 
+canister.Definition = require('./src/definition');
 canister.Builder = require('./src/builder');
 canister.Parser = require('./src/parser');
 canister.ModuleLoader = require('./src/loader');

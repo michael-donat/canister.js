@@ -26,5 +26,20 @@ components:
   node.path:
     module: path
   node.path.join:
-      property: path::join
+    property: path::join
+  my.tagged.service:
+    class: ./fixture::TaggedClass
+    tags:
+      'tag key': 'tag value'
+      otherTag: 'otherValue'
+    call:
+      - method: 'setA'
+        with:
+        - [1,2,3]
+      - method: 'setB'
+        with:
+          - string value
+          - 123
+          - '@my.property'
+          - '@my.parameter'
 

@@ -51,5 +51,10 @@ describe('Canister.js', function() {
 		expect(container.get('node.path')).to.be.equal(path);
 
 		expect(container.get('node.path.join')).to.be.equal(path.join);
+
+		expect(container.get('my.tagged.service').a).to.be.eql([1,2,3]);
+		expect(container.get('my.tagged.service').b).to.be.eql(
+			['string value', 123, 'prop.A.value', 'parameterValue']
+		);
 	})
 })

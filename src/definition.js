@@ -1,10 +1,46 @@
+class Tag {
+	constructor(name, value) {
+		this.name = name;
+		this.value = value;
+	}
+}
 class Definition {
 	constructor(id) {
 		this._id = id;
+		this._tags = [];
 	}
 
 	get id() {
 		return this._id;
+	}
+
+	get tags() {
+		return this._tags;
+	}
+
+	addTag(tag) {
+		if (!(tag instanceof Tag)) {
+			throw new Error(`Expected an instance of Tag but got '${typeof (tag)}'`);
+		}
+		this._tags.push(tag);
+	}
+}
+
+class Call {
+	constructor(method) {
+		this.method = method;
+		this.args = [];
+	}
+
+	addArgument(arg) {
+		if (!(arg instanceof Definition)) {
+			throw new Error(`Unexpected method argument for '${this.method}', expected an instance of Definition`);
+		}
+		this.args.push(arg);
+	}
+
+	getArguments() {
+		return this.args;
 	}
 }
 
@@ -28,6 +64,7 @@ class PropertyDefinition extends Definition {
 }
 
 class ClassDefinition extends Definition {
+
 	isTransient() {
 		return Boolean(this.transient);
 	}
@@ -44,6 +81,24 @@ class ClassDefinition extends Definition {
 
 	getConstructorArguments() {
 		return this.args;
+	}
+
+	get calls() {
+		return this._calls;
+	}
+
+	addCall(call) {
+		if (!(call instanceof Call)) {
+			throw new Error(`Expected an instance of Call but got '${typeof (call)}'`);
+		}
+		if (!this._calls) {
+			this._calls = [];
+		}
+		this._calls.push(call);
+	}
+
+	hasCalls() {
+		return this._calls && Boolean(this._calls.length);
 	}
 }
 
@@ -101,4 +156,15 @@ Definition.class = function (id, klass, module, transient) {
 Definition.reference = function (id) {
 	return new Definition(id);
 };
+
+Definition.tag = function (name, value) {
+	return new Tag(name, value);
+};
+
+Definition.call = function (method, ...args) {
+	const call = new Call(method);
+	args.forEach(arg => call.addArgument(arg));
+	return call;
+};
+
 module.exports = Definition;

@@ -2,6 +2,7 @@ const EventEmitter = require('events').EventEmitter;
 const DepGraph = require('dependency-graph').DepGraph;
 const Container = require('./container');
 const Definition = require('./definition');
+const _filter = require('lodash.filter')
 
 module.exports = class Builder extends EventEmitter {
 	constructor(loader) {
@@ -15,6 +16,20 @@ module.exports = class Builder extends EventEmitter {
 		this.cycles.push(cycle);
 	}
 
+	getDefinitionsByTag(tagName) {
+		return _filter(this.definitions, definition => {
+			return definition.tags.filter(tag => tag.name === tagName).length > 0
+		});
+	}
+
+	getDefinitionById(id) {
+		if (!this.definitions[id]) {
+			throw new Error(`Unknown definition ${id}`);
+		}
+
+		return this.definitions[id];
+	}
+
 	addDefinition(definition) {
 		if (!(definition instanceof Definition)) {
 			throw new Error('Expected an instance of Definition');
@@ -23,7 +38,7 @@ module.exports = class Builder extends EventEmitter {
 			throw new Error('Unexpected instance of value definition');
 		}
 		if (this.definitions[definition.id]) {
-			throw new Error(`Duplicate definition ${definition.id}`);
+			throw new Error(`Duplicate definition '${definition.id}'`);
 		}
 		this.definitions[definition.id] = definition;
 	}
@@ -41,6 +56,7 @@ module.exports = class Builder extends EventEmitter {
 		}
 
 		let getParams = () => [];
+		let applyCalls = f => f;
 
 		if (definition.hasConstructorArguments()) {
 			getParams = container => {
@@ -52,8 +68,22 @@ module.exports = class Builder extends EventEmitter {
 			};
 		}
 
+		if (definition.hasCalls()) {
+			applyCalls = (instance, container) => {
+				definition.calls.forEach(call => {
+					if (!instance[call.method]) {
+						throw new Error(`Can't find method '${call.method}' of class '${definition.class}' in module '${definition.module}' for definition '${definition.id}'`);
+					}
+					let callParams = call.args.map(arg => arg.isValue() ? arg.value : container.get(arg.id));
+					instance[call.method](...callParams);
+				});
+			};
+		}
+
 		let constructorFunction = function (container) {
-			return new Klass(...getParams(container));
+			const instance = new Klass(...getParams(container));
+			applyCalls(instance, container);
+			return instance;
 		};
 		constructorFunction.__canisterBuilderProxy = true;
 
@@ -90,6 +120,16 @@ module.exports = class Builder extends EventEmitter {
 						graph.addDependency(id, arg.id);
 					});
 				}
+				if (definition.isClass() && definition.hasCalls()) {
+					definition.calls.forEach(call => {
+						call.getArguments().forEach(arg => {
+							if (arg.isValue()) {
+								return;
+							}
+							graph.addDependency(id, arg.id);
+						});
+					});
+				}
 			}
 		}
 		return graph;
@@ -106,18 +146,19 @@ module.exports = class Builder extends EventEmitter {
 
 		graph.overallOrder().forEach(id => {
 			let definition = this.definitions[id];
+			let builtValue;
 			switch (true) {
 				case definition.isParameter(): {
-					container.register(definition.id, definition.value);
+					builtValue = definition.value;
 					break;
 				}
 				case definition.isClass(): {
-					container.register(definition.id, this.__buildClass(definition)(container));
+					builtValue = this.__buildClass(definition)(container);
 					break;
 				}
 				case definition.isModule(): {
 					try {
-						container.register(definition.id, this.loader.loadModule(definition.module));
+						builtValue = this.loader.loadModule(definition.module);
 					} catch (err) {
 						const error = new Error(`Can't load module '${definition.module}' for definition '${definition.id}'`);
 						error.previous = err;
@@ -141,13 +182,15 @@ module.exports = class Builder extends EventEmitter {
 						throw new Error(`Can't locate property '${definition.property}' from module '${definition.module}' for definition '${definition.id}'`);
 					}
 
-					container.register(definition.id, property);
+					builtValue = property;
 					break;
 				}
 				default: {
 					throw new Error(`Unsupported definition type for '${definition.id}'`);
 				}
 			}
+
+			container.register(definition.id, builtValue);
 		});
 
 		container.lock();

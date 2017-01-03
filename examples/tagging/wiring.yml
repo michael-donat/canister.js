@@ -1,0 +1,15 @@
+components:
+  logger:
+    class: './lib::Logger'
+
+  transport.A:
+    class: './lib::Transport'
+    with: ['A']
+    tags:
+      logger.transport: ~
+
+  transport.B:
+    class: './lib::Transport'
+    with: ['B']
+    tags:
+      logger.transport: ~
