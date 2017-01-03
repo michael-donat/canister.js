@@ -24,6 +24,10 @@ class Definition {
 		}
 		this._tags.push(tag);
 	}
+
+	hasCalls() {
+		return this._calls && Boolean(this._calls.length);
+	}
 }
 
 class Call {
@@ -41,6 +45,28 @@ class Call {
 
 	getArguments() {
 		return this.args;
+	}
+}
+
+class DefinitionWithCalls extends Definition {
+	get calls() {
+		return this._calls;
+	}
+
+	addCall(call) {
+		if (!(call instanceof Call)) {
+			throw new Error(`Expected an instance of Call but got '${typeof (call)}'`);
+		}
+		if (!this._calls) {
+			this._calls = [];
+		}
+		this._calls.push(call);
+	}
+}
+
+class FactoryDefinition extends DefinitionWithCalls {
+	isTransient() {
+		return Boolean(this.transient);
 	}
 }
 
@@ -63,7 +89,7 @@ class PropertyDefinition extends Definition {
 
 }
 
-class ClassDefinition extends Definition {
+class ClassDefinition extends DefinitionWithCalls {
 
 	isTransient() {
 		return Boolean(this.transient);
@@ -83,23 +109,6 @@ class ClassDefinition extends Definition {
 		return this.args;
 	}
 
-	get calls() {
-		return this._calls;
-	}
-
-	addCall(call) {
-		if (!(call instanceof Call)) {
-			throw new Error(`Expected an instance of Call but got '${typeof (call)}'`);
-		}
-		if (!this._calls) {
-			this._calls = [];
-		}
-		this._calls.push(call);
-	}
-
-	hasCalls() {
-		return this._calls && Boolean(this._calls.length);
-	}
 }
 
 Definition.prototype.isValue = function () {
@@ -120,6 +129,10 @@ Definition.prototype.isModule = function () {
 
 Definition.prototype.isProperty = function () {
 	return this instanceof PropertyDefinition;
+};
+
+Definition.prototype.isFactory = function () {
+	return this instanceof FactoryDefinition;
 };
 
 Definition.value = function (value) {
@@ -165,6 +178,14 @@ Definition.call = function (method, ...args) {
 	const call = new Call(method);
 	args.forEach(arg => call.addArgument(arg));
 	return call;
+};
+
+Definition.factory = function (id, method, module, transient, ...args) {
+	const definition = new FactoryDefinition(id);
+	definition.module = module;
+	definition.transient = transient;
+	definition.addCall(Definition.call(method, ...args));
+	return definition;
 };
 
 module.exports = Definition;

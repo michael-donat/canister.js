@@ -17,4 +17,8 @@ module.exports.TaggedClass = class {
 	setB(...b) {
 		this.b = b;
 	}
+};
+
+module.exports.factoryFunction = function(...args) {
+	return {args, id: uuid.v1()};
 }

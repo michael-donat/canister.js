@@ -61,6 +61,17 @@ module.exports = class Parser {
 						});
 					}
 				}
+				if (value.factory) {
+					let match = value.factory.match(/(.*?)::(.*)/);
+					let module = value.factory;
+					let method = null;
+
+					if (match) {
+						[, module, method] = match;
+					}
+
+					yieldValue = Definition.factory(id, method, module, Boolean(value.transient), ...this.__parseArgs(value.with));
+				}
 
 				if (value.tags) {
 					for (let name in value.tags) {

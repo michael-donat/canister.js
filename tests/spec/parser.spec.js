@@ -94,6 +94,68 @@ describe('Parser', function() {
 		expect(definition).to.be.eql(compare);
 	});
 
+	it('parses factories when factory is module property', function() {
+		const parser = new Parser({
+			components: { 'my.class': {
+				factory: 'lib/smth::B',
+				with: [
+					1, 2, 3
+				]
+			} }
+		});
+
+		const definition = parser.parse().next().value;
+
+		expect(definition).to.be.an.instanceOf(Definition);
+
+		const compare = Definition.factory(
+			'my.class', 'B', 'lib/smth', false,
+			Definition.value(1),Definition.value(2),Definition.value(3)
+		);
+
+		expect(definition).to.be.eql(compare);
+	});
+
+	it('parses factories when factory is a module', function() {
+		const parser = new Parser({
+			components: { 'my.class': {
+				factory: 'lib/smth',
+				with: [
+					1, 2, 3
+				]
+			} }
+		});
+
+		const definition = parser.parse().next().value;
+
+		expect(definition).to.be.an.instanceOf(Definition);
+
+		const compare = Definition.factory(
+			'my.class', null, 'lib/smth', false,
+			Definition.value(1),Definition.value(2),Definition.value(3)
+		);
+
+		expect(definition).to.be.eql(compare);
+	});
+
+	it('parses factories without arguments', function() {
+		const parser = new Parser({
+			components: { 'my.class': {
+				factory: 'lib/smth::A'
+			} }
+		});
+
+		const definition = parser.parse().next().value;
+
+		expect(definition).to.be.an.instanceOf(Definition);
+
+		const compare = Definition.factory(
+			'my.class', 'A', 'lib/smth', false
+		);
+
+		expect(definition).to.be.eql(compare);
+	})
+
 	it('parses tags', function() {
 		const parser = new Parser({
 			components: { 'my.class': {

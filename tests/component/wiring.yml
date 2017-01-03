@@ -42,4 +42,20 @@ components:
           - 123
           - '@my.property'
           - '@my.parameter'
+  my.factory.function:
+    factory: './fixture::factoryFunction'
+    with:
+      - 1
+      - '@my.parameter'
+  my.factory:
+    factory: './factory'
+    with:
+      - 2
+      - '@my.property'
+  my.transient.factory:
+    factory: './fixture::factoryFunction'
+    with:
+      - 3
+    transient: true
+
 

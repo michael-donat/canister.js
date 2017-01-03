@@ -109,6 +109,21 @@ Above will result in an invocation equivalent to `new require('./module').ClassN
  
 Classes with constructor arguments can also be transient.
 
+### Registering factory methods
+
+```yml
+components:
+  my.factory.as.only.export: {factory: './module' }
+  my.factory:
+    factory: './module::factoryFunction'
+    with:
+     - first argument
+     - 2
+  my.instances:
+    factory: './module::factoryFunction'
+    transient: true
+```
+
 ### Calling methods before returning an instance
 
 ```yml

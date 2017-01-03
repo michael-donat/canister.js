@@ -56,5 +56,14 @@ describe('Canister.js', function() {
 		expect(container.get('my.tagged.service').b).to.be.eql(
 			['string value', 123, 'prop.A.value', 'parameterValue']
 		);
+
+		expect(container.get('my.factory.function').args).to.be.eql([1, 'parameterValue']);
+		expect(container.get('my.factory.function')).to.be.equal(container.get('my.factory.function'))
+
+		expect(container.get('my.factory')).to.be.eql([2, 'prop.A.value']);
+
+		expect(container.get('my.transient.factory')).to.not.be.equal(
+			container.get('my.transient.factory')
+		)
 	})
 })

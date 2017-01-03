@@ -1,8 +1,8 @@
 const EventEmitter = require('events').EventEmitter;
+const _filter = require('lodash.filter');
 const DepGraph = require('dependency-graph').DepGraph;
 const Container = require('./container');
 const Definition = require('./definition');
-const _filter = require('lodash.filter')
 
 module.exports = class Builder extends EventEmitter {
 	constructor(loader) {
@@ -18,7 +18,7 @@ module.exports = class Builder extends EventEmitter {
 
 	getDefinitionsByTag(tagName) {
 		return _filter(this.definitions, definition => {
-			return definition.tags.filter(tag => tag.name === tagName).length > 0
+			return definition.tags.filter(tag => tag.name === tagName).length > 0;
 		});
 	}
 
@@ -41,6 +41,49 @@ module.exports = class Builder extends EventEmitter {
 			throw new Error(`Duplicate definition '${definition.id}'`);
 		}
 		this.definitions[definition.id] = definition;
+	}
+
+	__buildFactory(definition) {
+		let loadedModule = this.loader.loadModule(definition.module);
+		let method;
+		let call = definition.calls[0];
+
+		if (call.method && !loadedModule[call.method]) {
+			throw new Error(`Can't find factory method '${call.method}' in module '${definition.module}' for definition '${definition.id}'`);
+		}
+
+		if (call.method) {
+			method = loadedModule[call.method];
+		}
+
+		let getParams = () => [];
+		if (call.getArguments().length > 0) {
+			getParams = container => {
+				const params = [];
+				call.getArguments().forEach(argDefinition => {
+					params.push(argDefinition.isValue() ? argDefinition.value : container.get(argDefinition.id));
+				});
+				return params;
+			};
+		}
+
+		let constructorFunction = function (container) {
+			return method ?
+				method(...getParams(container)) :
+				loadedModule(...getParams(container));
+		};
+
+		constructorFunction.__canisterBuilderProxy = true;
+
+		let returnFunction = constructorFunction;
+
+		if (definition.isTransient()) {
+			returnFunction = function () {
+				return constructorFunction;
+			};
+		}
+
+		return returnFunction;
 	}
 
 	__buildClass(definition) {
@@ -120,7 +163,7 @@ module.exports = class Builder extends EventEmitter {
 						graph.addDependency(id, arg.id);
 					});
 				}
-				if (definition.isClass() && definition.hasCalls()) {
+				if (definition.hasCalls()) {
 					definition.calls.forEach(call => {
 						call.getArguments().forEach(arg => {
 							if (arg.isValue()) {
@@ -150,6 +193,10 @@ module.exports = class Builder extends EventEmitter {
 			switch (true) {
 				case definition.isParameter(): {
 					builtValue = definition.value;
+					break;
+				}
+				case definition.isFactory(): {
+					builtValue = this.__buildFactory(definition)(container);
 					break;
 				}
 				case definition.isClass(): {

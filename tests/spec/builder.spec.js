@@ -3,12 +3,16 @@ const Container = require('./../../src/container');
 const Definition = require('./../../src/definition');
 const uuid = require('uuid');
 
+const functionModule = {
+
+}
+
 const testClassModule = {
 	TestClass: class TestClass {
 		constructor(...args) { this.args = args; this.id = uuid.v1(); this.vals = {}};
 		setValue(key, val) { this.vals[key] = val;}
 	},
-	prop: 1,
+	prop: 1
 };
 
 const ExportClass = class {
@@ -17,7 +21,8 @@ const ExportClass = class {
 
 const stubMap = {
 	'test.class': testClassModule,
-	'export.class': ExportClass
+	'export.class': ExportClass,
+	'function.module': functionModule
 }
 
 class StubLoader {
@@ -171,7 +176,7 @@ describe('Builder', function() {
 		expect(()=>this.builder.build()).to.throw();
 	});
 
-	it('calls methods on returned value', function() {
+	it('calls methods on returned instances', function() {
 
 		const definitionA = Definition.class('a', 'TestClass', 'test.class', true);
 		const definitionB = Definition.class('b', 'TestClass', 'test.class');
@@ -190,6 +195,46 @@ describe('Builder', function() {
 		expect(instance.vals['b']).to.equal(container.get('b'));
 
 	});
+
+	it('calls factory method with parameters', function() {
+
+		functionModule.A = sinon.stub();
+
+		const definitionA = Definition.factory(
+			'function.module', 'A', 'function.module', false,
+			Definition.value(1), Definition.reference('B')
+		);
+
+		const definitionB = Definition.parameter('B', 2);
+
+		this.builder.addDefinition(definitionA);
+		this.builder.addDefinition(definitionB);
+
+		this.builder.build();
+
+		expect(functionModule.A).to.have.been.calledWith(1, 2);
+
+	});
+
+	it('calls factory method when module is factory', function() {
+
+		stubMap['factory.module'] = sinon.stub();
+
+		const definitionA = Definition.factory(
+			'factory.module', null, 'factory.module', false,
+			Definition.value(1), Definition.reference('B')
+		);
+
+		const definitionB = Definition.parameter('B', 2);
+
+		this.builder.addDefinition(definitionA);
+		this.builder.addDefinition(definitionB);
+
+		this.builder.build();
+
+		expect(stubMap['factory.module']).to.have.been.calledWith(1, 2);
+
+	})
 
 	it('returns definitions by id', function() {
 		const definition = Definition.parameter('a', 1);
