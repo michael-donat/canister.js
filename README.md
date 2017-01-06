@@ -1,5 +1,7 @@
 # Canister.js [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)]() [![Build Status](https://img.shields.io/travis/michael-donat/canister.js.svg?style=flat-square)](https://travis-ci.org/michael-donat/canister.js)
  
+Heavily inspired by fantastic experiences while using [Symfony Dependency Injecion Component](https://symfony.com/doc/current/components/dependency_injection.html)
+ 
 ## Requirements
 
 You will need `node v6.0.0` or higher to be able to use canister. Please get in touch or submit a PR if you need compatibility with lower versions or iojs.
