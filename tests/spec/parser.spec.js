@@ -194,5 +194,33 @@ describe('Parser', function() {
 				Definition.reference('dependency')
 			)
 		])
-	})
-})
+	});
+
+	it('parses argument structures with refs', function() {
+		const parser = new Parser({
+			components: { 'my.class': {
+				class: 'lib/smth::B',
+				with: [
+					1,
+					'a',
+					[1,2,'@ref'],
+					{name: 'value', ref: '@ref'}
+				]
+			} }
+		});
+
+		const definition = parser.parse().next().value;
+
+		expect(definition).to.be.an.instanceOf(Definition);
+
+		const compare = Definition.class('my.class', 'B', 'lib/smth', false);
+		compare.constructWith(
+			Definition.value(1),
+			Definition.value('a'),
+			Definition.structure([1,2,Definition.reference('ref')]),
+			Definition.structure({name: 'value', ref: Definition.reference('ref')})
+		);
+
+		expect(definition).to.be.eql(compare);
+	});
+});

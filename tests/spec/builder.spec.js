@@ -97,7 +97,7 @@ describe('Builder', function() {
 		expect(instance).to.equal(container.get('a'));
 
 		expect(instance).to.be.an.instanceOf(stubMap['export.class']);
-	})
+	});
 
 	it('builds Class instance with constructor parameters', function() {
 		const definition = Definition.class('a', 'TestClass', 'test.class');
@@ -116,6 +116,30 @@ describe('Builder', function() {
 		expect(instance).to.be.an.instanceOf(stubMap['test.class'].TestClass);
 
 		expect(instance.args).to.be.eql([1,2,3]);
+	});
+
+	it('builds Class instance with nested references', function() {
+		const definition = Definition.class('a', 'TestClass', 'test.class');
+		definition.constructWith(
+			Definition.structure([1,2,Definition.reference('ref')])
+		);
+		definition.addCall(Definition.call('setValue', Definition.value('a'), Definition.structure({
+			b: {c: {d: Definition.reference('ref')}}
+		})));
+
+		this.builder.addDefinition(definition);
+		this.builder.addDefinition(Definition.parameter('ref', 'refValue'));
+
+		const container = this.builder.build();
+
+		const instance = container.get('a');
+
+		expect(instance).to.be.an.instanceOf(stubMap['test.class'].TestClass);
+
+		expect(instance.args).to.be.eql([[1,2,'refValue']]);
+		expect(instance.vals).to.be.eql({
+			a: {b: {c: {d: 'refValue'}}}
+		});
 	});
 
 	it('builds module component from definition', function() {
@@ -202,7 +226,8 @@ describe('Builder', function() {
 
 		const definitionA = Definition.factory(
 			'function.module', 'A', 'function.module', false,
-			Definition.value(1), Definition.reference('B')
+			Definition.value(1), Definition.reference('B'),
+			Definition.structure({a: {b: {c: Definition.reference('B')}}})
 		);
 
 		const definitionB = Definition.parameter('B', 2);
@@ -212,7 +237,9 @@ describe('Builder', function() {
 
 		this.builder.build();
 
-		expect(functionModule.A).to.have.been.calledWith(1, 2);
+		expect(functionModule.A).to.have.been.calledWith(1, 2, {
+			a: {b: {c: 2}}
+		});
 
 	});
 

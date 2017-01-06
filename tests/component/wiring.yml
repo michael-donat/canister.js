@@ -57,5 +57,13 @@ components:
     with:
       - 3
     transient: true
+  my.nested.constructor:
+    class: ./fixture::SomeClass
+    with:
+      - {prop: '@my.parameter', more: { param: '@my.parameter' }}
+  my.nested.factory:
+    class: ./fixture::factoryFunction
+    with:
+      - {prop: '@my.parameter', more: { param: '@my.parameter' }}
 
 

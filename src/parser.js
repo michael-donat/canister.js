@@ -1,8 +1,24 @@
+const _mapValues = require('lodash.mapvalues');
+const _isArray = require('lodash.isarray');
+const _map = require('lodash.map');
 const Definition = require('./definition');
 
 module.exports = class Parser {
 	constructor(dictionary) {
 		this.dictionary = dictionary;
+	}
+
+	__parseStruct(v) {
+		const method = _isArray(v) ? _map : _mapValues;
+		return method(v, val => {
+			if (/^@/.test(val)) {
+				return Definition.reference(val.replace(/^@/, ''));
+			}
+			if (typeof val !== 'object') {
+				return val;
+			}
+			return this.__parseStruct(val);
+		});
 	}
 
 	__parseArgs(args) {
@@ -14,7 +30,10 @@ module.exports = class Parser {
 			if (/^@/.test(v)) {
 				return Definition.reference(v.replace(/^@/, ''));
 			}
-			return Definition.value(v);
+			if (typeof v !== 'object') {
+				return Definition.value(v);
+			}
+			return Definition.structure(this.__parseStruct(v));
 		});
 	}
 

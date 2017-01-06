@@ -77,6 +77,13 @@ class ValueDefinition extends Definition {
 	}
 }
 
+class StructureDefinition extends Definition {
+	constructor(value) {
+		super(null);
+		this.value = value;
+	}
+}
+
 class ParameterDefinition extends Definition {
 
 }
@@ -110,6 +117,10 @@ class ClassDefinition extends DefinitionWithCalls {
 	}
 
 }
+
+Definition.prototype.isStructure = function () {
+	return this instanceof StructureDefinition;
+};
 
 Definition.prototype.isValue = function () {
 	return this instanceof ValueDefinition;
@@ -185,6 +196,11 @@ Definition.factory = function (id, method, module, transient, ...args) {
 	definition.module = module;
 	definition.transient = transient;
 	definition.addCall(Definition.call(method, ...args));
+	return definition;
+};
+
+Definition.structure = function (structure) {
+	const definition = new StructureDefinition(structure);
 	return definition;
 };
 

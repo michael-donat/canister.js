@@ -64,6 +64,14 @@ describe('Canister.js', function() {
 
 		expect(container.get('my.transient.factory')).to.not.be.equal(
 			container.get('my.transient.factory')
-		)
+		);
+
+		expect(container.get('my.nested.constructor').args).to.be.eql([{
+			prop: 'parameterValue', more: {param: 'parameterValue'}
+		}]);
+
+		expect(container.get('my.nested.factory').args).to.be.eql([{
+			prop: 'parameterValue', more: {param: 'parameterValue'}
+		}]);
 	})
 })

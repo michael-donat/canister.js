@@ -1,8 +1,51 @@
 const EventEmitter = require('events').EventEmitter;
 const _filter = require('lodash.filter');
+const _mapValues = require('lodash.mapvalues');
+const _isArray = require('lodash.isarray');
+const _map = require('lodash.map');
 const DepGraph = require('dependency-graph').DepGraph;
 const Container = require('./container');
 const Definition = require('./definition');
+
+function getStructureDeps(structure) {
+	return [].concat.apply([], _map(structure, val => {
+		if (val instanceof Definition) {
+			return val.id;
+		}
+
+		if (typeof val !== 'object') {
+			return null;
+		}
+
+		return getStructureDeps(val);
+	})).filter(v => v);
+}
+
+function prepareStructure(container, structure) {
+	const method = _isArray(structure) ? _map : _mapValues;
+	return method(structure, val => {
+		if (val instanceof Definition) {
+			return container.get(val.id);
+		}
+
+		if (typeof val !== 'object') {
+			return val;
+		}
+		return prepareStructure(container, val);
+	});
+}
+
+function prepareArgument(container, argDefinition) {
+	if (argDefinition.isValue()) {
+		return argDefinition.value;
+	}
+
+	if (argDefinition.isStructure()) {
+		return prepareStructure(container, argDefinition.value);
+	}
+
+	return container.get(argDefinition.id);
+}
 
 module.exports = class Builder extends EventEmitter {
 	constructor(loader) {
@@ -61,7 +104,7 @@ module.exports = class Builder extends EventEmitter {
 			getParams = container => {
 				const params = [];
 				call.getArguments().forEach(argDefinition => {
-					params.push(argDefinition.isValue() ? argDefinition.value : container.get(argDefinition.id));
+					params.push(prepareArgument(container, argDefinition));
 				});
 				return params;
 			};
@@ -105,7 +148,7 @@ module.exports = class Builder extends EventEmitter {
 			getParams = container => {
 				const params = [];
 				definition.getConstructorArguments().forEach(argDefinition => {
-					params.push(argDefinition.isValue() ? argDefinition.value : container.get(argDefinition.id));
+					params.push(prepareArgument(container, argDefinition));
 				});
 				return params;
 			};
@@ -117,7 +160,7 @@ module.exports = class Builder extends EventEmitter {
 					if (!instance[call.method]) {
 						throw new Error(`Can't find method '${call.method}' of class '${definition.class}' in module '${definition.module}' for definition '${definition.id}'`);
 					}
-					let callParams = call.args.map(arg => arg.isValue() ? arg.value : container.get(arg.id));
+					let callParams = call.args.map(arg => prepareArgument(container, arg));
 					instance[call.method](...callParams);
 				});
 			};
@@ -144,7 +187,7 @@ module.exports = class Builder extends EventEmitter {
 	__buildGraph() {
 		const graph = new DepGraph();
 		for (let id in this.definitions) {
-			if (this.definitions[id].isValue()) {
+			if (this.definitions[id].isValue() || this.definitions[id].isStructure()) {
 				continue;
 			}
 			graph.addNode(id);
@@ -152,12 +195,18 @@ module.exports = class Builder extends EventEmitter {
 		for (let id in this.definitions) {
 			if (Object.prototype.hasOwnProperty.call(this.definitions, id)) {
 				let definition = this.definitions[id];
-				if (definition.isValue()) {
+				if (definition.isValue() || definition.isStructure()) {
 					continue;
 				}
 				if (definition.isClass() && definition.hasConstructorArguments()) {
 					definition.getConstructorArguments().forEach(arg => {
 						if (arg.isValue()) {
+							return;
+						}
+						if (arg.isStructure()) {
+							getStructureDeps(arg).forEach(ref => {
+								graph.addDependency(id, ref);
+							});
 							return;
 						}
 						graph.addDependency(id, arg.id);
@@ -167,6 +216,12 @@ module.exports = class Builder extends EventEmitter {
 					definition.calls.forEach(call => {
 						call.getArguments().forEach(arg => {
 							if (arg.isValue()) {
+								return;
+							}
+							if (arg.isStructure()) {
+								getStructureDeps(arg).forEach(ref => {
+									graph.addDependency(id, ref);
+								});
 								return;
 							}
 							graph.addDependency(id, arg.id);
