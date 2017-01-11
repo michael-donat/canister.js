@@ -11,10 +11,10 @@ describe('Loader', function() {
 	});
 
 	it('knows node modules', function() {
-		expect(this.loader.path('util')).to.equal('util');
+		expect(this.loader.path('v8')).to.equal('v8');
 	});
 
 	it('knows paths relative to defined root', function() {
-		expect(this.loader.path('./util')).to.equal(path.join(__dirname, 'util'));
+		expect(this.loader.path('./loader.spec.js')).to.equal(path.join(__dirname, 'loader.spec.js'));
 	});
 })

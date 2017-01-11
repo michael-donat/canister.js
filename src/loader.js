@@ -1,4 +1,5 @@
 const path = require('path');
+const resolve = require('resolve').sync;
 
 module.exports = class Loader {
 	constructor(root) {
@@ -10,11 +11,7 @@ module.exports = class Loader {
 			return module;
 		}
 
-		if (/^[^.^/]/.test(module)) {
-			return module;
-		}
-
-		return path.join(this.root, module);
+		return resolve(module, {basedir: this.root});
 	}
 
 	loadModule(module) {

@@ -187,7 +187,9 @@ components:
 	 		- {name: '@pkg::name'}
 ```
 
+### Referencing the container itself
 
+While not recommended it is possible to pass the entire container as an argument. To do this just reference it with `@canister`.
 
 ### Tagging
 

@@ -48,6 +48,10 @@ class Call {
 	}
 }
 
+class SelfDefinition extends Definition {
+
+}
+
 class DefinitionWithCalls extends Definition {
 	get calls() {
 		return this._calls;
@@ -157,6 +161,10 @@ Definition.prototype.isFactory = function () {
 	return this instanceof FactoryDefinition;
 };
 
+Definition.prototype.isSelf = function () {
+	return this instanceof SelfDefinition;
+};
+
 Definition.value = function (value) {
 	return new ValueDefinition(value);
 };
@@ -215,4 +223,7 @@ Definition.structure = function (structure) {
 	return definition;
 };
 
+Definition.self = function () {
+	return new SelfDefinition();
+}
 module.exports = Definition;

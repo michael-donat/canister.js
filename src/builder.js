@@ -8,9 +8,28 @@ const DepGraph = require('dependency-graph').DepGraph;
 const Container = require('./container');
 const Definition = require('./definition');
 
+function getReference(container, argDefinition) {
+
+	if (argDefinition.isSelf()) {
+		return container;
+	}
+
+	let value = container.get(argDefinition.id);
+
+	if (argDefinition.prop) {
+		return _get(value, argDefinition.prop);
+	}
+	return value;
+}
+
+
 function getStructureDeps(structure) {
 	return [].concat.apply([], _map(structure, val => {
 		if (val instanceof Definition) {
+			if (val.isSelf()) {
+				return null;
+			}
+
 			return val.id;
 		}
 
@@ -26,7 +45,7 @@ function prepareStructure(container, structure) {
 	const method = _isArray(structure) ? _map : _mapValues;
 	return method(structure, val => {
 		if (val instanceof Definition) {
-			return container.get(val.id);
+			return getReference(container, val)
 		}
 
 		if (typeof val !== 'object') {
@@ -45,12 +64,7 @@ function prepareArgument(container, argDefinition) {
 		return prepareStructure(container, argDefinition.value);
 	}
 
-	let value = container.get(argDefinition.id);
-
-	if (argDefinition.prop) {
-		return _get(value, argDefinition.prop);
-	}
-	return value;
+	return getReference(container, argDefinition);
 }
 
 module.exports = class Builder extends EventEmitter {
@@ -201,12 +215,12 @@ module.exports = class Builder extends EventEmitter {
 		for (let id in this.definitions) {
 			if (Object.prototype.hasOwnProperty.call(this.definitions, id)) {
 				let definition = this.definitions[id];
-				if (definition.isValue() || definition.isStructure()) {
+				if (definition.isValue() || definition.isStructure() || definition.isSelf()) {
 					continue;
 				}
 				if (definition.isClass() && definition.hasConstructorArguments()) {
 					definition.getConstructorArguments().forEach(arg => {
-						if (arg.isValue()) {
+						if (arg.isValue() || arg.isSelf()) {
 							return;
 						}
 						if (arg.isStructure()) {
@@ -221,7 +235,7 @@ module.exports = class Builder extends EventEmitter {
 				if (definition.hasCalls()) {
 					definition.calls.forEach(call => {
 						call.getArguments().forEach(arg => {
-							if (arg.isValue()) {
+							if (arg.isValue() || arg.isSelf()) {
 								return;
 							}
 							if (arg.isStructure()) {
@@ -268,7 +282,7 @@ module.exports = class Builder extends EventEmitter {
 					try {
 						builtValue = this.loader.loadModule(definition.module);
 					} catch (err) {
-						const error = new Error(`Can't load module '${definition.module}' for definition '${definition.id}'`);
+						const error = new Error(`Can't load module '${definition.module}' for definition '${definition.id}'. [${err.message}]`);
 						error.previous = err;
 						throw error;
 					}

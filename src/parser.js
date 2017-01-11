@@ -8,11 +8,28 @@ module.exports = class Parser {
 		this.dictionary = dictionary;
 	}
 
+	__parseReference(v) {
+
+		if (v === '@canister') {
+			return Definition.self();
+		}
+
+		let value = v.replace(/^@/, '');
+		let prop;
+		let reference = value;
+		let match = value.match(/(.*?)::(.*)/);
+		if (match) {
+			[, reference, prop] = match;
+		}
+
+		return Definition.reference(reference, prop);
+	}
+
 	__parseStruct(v) {
 		const method = _isArray(v) ? _map : _mapValues;
 		return method(v, val => {
 			if (/^@/.test(val)) {
-				return Definition.reference(val.replace(/^@/, ''));
+				return this.__parseReference(val);
 			}
 			if (typeof val !== 'object') {
 				return val;
@@ -28,15 +45,7 @@ module.exports = class Parser {
 
 		return args.map(v => {
 			if (/^@/.test(v)) {
-				let value = v.replace(/^@/, '');
-				let prop;
-				let reference = value;
-				let match = value.match(/(.*?)::(.*)/);
-				if (match) {
-					[, reference, prop] = match;
-				}
-
-				return Definition.reference(reference, prop);
+				return this.__parseReference(v);
 			}
 			if (typeof v !== 'object') {
 				return Definition.value(v);
