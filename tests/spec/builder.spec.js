@@ -187,6 +187,26 @@ describe('Builder', function() {
 		expect(instance.args[2]).to.equal(container.get('test.class.instance'));
 	});
 
+	it('builds instances with argument pointing at reference property', function() {
+
+		const definition = Definition.class('a', 'TestClass', 'test.class');
+
+		definition.constructWith(
+			Definition.reference('param', 'a.b.c')
+		);
+
+		this.builder.addDefinition(definition);
+
+		this.builder.addDefinition(Definition.parameter('param', {a: {b: {c: 42}}}));
+
+		const container = this.builder.build();
+
+		const instance = container.get('a');
+
+		expect(instance.args[0]).to.equal(42);
+
+	})
+
 	it('recognises cyclic dependencies', function() {
 		const definitionA = Definition.class('a', 'TestClass', 'test.class');
 		const definitionB = Definition.class('b', 'TestClass', 'test.class');

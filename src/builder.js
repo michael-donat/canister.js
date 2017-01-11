@@ -3,6 +3,7 @@ const _filter = require('lodash.filter');
 const _mapValues = require('lodash.mapvalues');
 const _isArray = require('lodash.isarray');
 const _map = require('lodash.map');
+const _get = require('lodash.get');
 const DepGraph = require('dependency-graph').DepGraph;
 const Container = require('./container');
 const Definition = require('./definition');
@@ -44,7 +45,12 @@ function prepareArgument(container, argDefinition) {
 		return prepareStructure(container, argDefinition.value);
 	}
 
-	return container.get(argDefinition.id);
+	let value = container.get(argDefinition.id);
+
+	if (argDefinition.prop) {
+		return _get(value, argDefinition.prop);
+	}
+	return value;
 }
 
 module.exports = class Builder extends EventEmitter {

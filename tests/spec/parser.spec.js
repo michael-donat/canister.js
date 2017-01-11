@@ -90,6 +90,22 @@ describe('Parser', function() {
 		const compare = Definition.class('my.class', 'B', 'lib/smth', false);
 		compare.constructWith(Definition.reference('dependency'));
 
+		expect(definition).to.be.eql(compare);
+	});
+
+	it('parses references with properties', function() {
+		const parser = new Parser({
+			components: { 'my.class': {
+				class: 'lib/smth::B',
+				with: [
+					'@dependency::a.b.c'
+				]
+			} }
+		});
+
+		const definition = parser.parse().next().value;
+		const compare = Definition.class('my.class', 'B', 'lib/smth', false);
+		compare.constructWith(Definition.reference('dependency', 'a.b.c'));
 
 		expect(definition).to.be.eql(compare);
 	});

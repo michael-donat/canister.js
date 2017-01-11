@@ -64,6 +64,13 @@ class DefinitionWithCalls extends Definition {
 	}
 }
 
+class ReferenceDefinition extends Definition {
+	constructor(id, prop) {
+		super(id);
+		this.prop = prop;
+	}
+}
+
 class FactoryDefinition extends DefinitionWithCalls {
 	isTransient() {
 		return Boolean(this.transient);
@@ -101,6 +108,7 @@ class ClassDefinition extends DefinitionWithCalls {
 	isTransient() {
 		return Boolean(this.transient);
 	}
+
 	constructWith(...args) {
 		if (args.filter(a => !(a instanceof Definition)).length > 0) {
 			throw new Error(`Unexpected constructor value for definition '${this.id}', expected an instance of Definition`);
@@ -115,8 +123,11 @@ class ClassDefinition extends DefinitionWithCalls {
 	getConstructorArguments() {
 		return this.args;
 	}
-
 }
+
+Definition.prototype.isReference = function () {
+	return this instanceof ReferenceDefinition;
+};
 
 Definition.prototype.isStructure = function () {
 	return this instanceof StructureDefinition;
@@ -177,8 +188,8 @@ Definition.class = function (id, klass, module, transient) {
 	return definition;
 };
 
-Definition.reference = function (id) {
-	return new Definition(id);
+Definition.reference = function (id, path) {
+	return new ReferenceDefinition(id, path);
 };
 
 Definition.tag = function (name, value) {

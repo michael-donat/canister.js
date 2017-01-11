@@ -1,5 +1,6 @@
 parameters:
   my.parameter: parameterValue
+  my.object: {param: 'objectParamValue'}
 components:
   my.module: {module: ./fixture}
   my.property: {property: ./fixture::A}
@@ -65,5 +66,9 @@ components:
     class: ./fixture::factoryFunction
     with:
       - {prop: '@my.parameter', more: { param: '@my.parameter' }}
+  my.prop.reference:
+    class: ./fixture::SomeClass
+    with:
+      - '@my.object::param'
 
 

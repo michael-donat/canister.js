@@ -28,7 +28,15 @@ module.exports = class Parser {
 
 		return args.map(v => {
 			if (/^@/.test(v)) {
-				return Definition.reference(v.replace(/^@/, ''));
+				let value = v.replace(/^@/, '');
+				let prop;
+				let reference = value;
+				let match = value.match(/(.*?)::(.*)/);
+				if (match) {
+					[, reference, prop] = match;
+				}
+
+				return Definition.reference(reference, prop);
 			}
 			if (typeof v !== 'object') {
 				return Definition.value(v);

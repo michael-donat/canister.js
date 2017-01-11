@@ -73,5 +73,7 @@ describe('Canister.js', function() {
 		expect(container.get('my.nested.factory').args).to.be.eql([{
 			prop: 'parameterValue', more: {param: 'parameterValue'}
 		}]);
+
+		expect(container.get('my.prop.reference').args).to.be.eql(['objectParamValue']);
 	})
 })

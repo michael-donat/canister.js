@@ -1,6 +1,6 @@
 # Canister.js [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)]() [![Build Status](https://img.shields.io/travis/michael-donat/canister.js.svg?style=flat-square)](https://travis-ci.org/michael-donat/canister.js)
  
-Heavily inspired by fantastic experiences while using [Symfony Dependency Injecion Component](https://symfony.com/doc/current/components/dependency_injection.html)
+Heavily inspired by [Symfony Dependency Injecion Component](https://symfony.com/doc/current/components/dependency_injection.html)
  
 ## Requirements
 
@@ -158,6 +158,36 @@ components:
 ```
 
 Canister will build components using an order obtained from dependency graph, if cyclic dependency is detected it will fail hard during build phase.
+
+### Referencing properties of components as other components arguments
+
+Useful when you want to get access to some properties of a registered component without having to define each one as a property.
+
+Kinda bad:
+
+```yml
+components:
+  name:
+    property: './package.json::name'
+  logger:
+    factory: 'bunyan::createLogger'
+	with:
+      - {name: '@name'}
+```
+
+Much better:
+
+```yml
+components:
+	pkg: 
+		module: './package.json'
+	logger:
+	 	factory: 'bunyan::createLogger'
+	 	with:
+	 		- {name: '@pkg::name'}
+```
+
+
 
 ### Tagging
 
