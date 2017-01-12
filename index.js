@@ -9,13 +9,19 @@ const canister = function canister(configPath, root) {
 
 	yamlLoader.fromFile(configPath);
 
-	const parser = new canister.Parser(yamlLoader.toJS());
+	return {
+		build: () => {
+			const parser = new canister.Parser(yamlLoader.toJS());
 
-	for (let definition of parser.parse()) {
-		builder.addDefinition(definition);
+			for (let definition of parser.parse()) {
+				builder.addDefinition(definition);
+			}
+			return builder.build();
+		},
+		configure: (configPath) => {
+			yamlLoader.fromFile(configPath);
+		}
 	}
-
-	return builder;
 }
 
 canister.Definition = require('./src/definition');

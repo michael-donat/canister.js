@@ -71,4 +71,3 @@ components:
     with:
       - '@my.object::param'
 
-
