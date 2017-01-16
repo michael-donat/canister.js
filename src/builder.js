@@ -1,15 +1,15 @@
 const EventEmitter = require('events').EventEmitter;
 const _filter = require('lodash.filter');
 const _mapValues = require('lodash.mapvalues');
-const _isArray = require('lodash.isarray');
 const _map = require('lodash.map');
 const _get = require('lodash.get');
 const DepGraph = require('dependency-graph').DepGraph;
 const Container = require('./container');
 const Definition = require('./definition');
 
-function getReference(container, argDefinition) {
+const _isArray = Array.isArray;
 
+function getReference(container, argDefinition) {
 	if (argDefinition.isSelf()) {
 		return container;
 	}
@@ -21,7 +21,6 @@ function getReference(container, argDefinition) {
 	}
 	return value;
 }
-
 
 function getStructureDeps(structure) {
 	return [].concat.apply([], _map(structure, val => {
@@ -45,7 +44,7 @@ function prepareStructure(container, structure) {
 	const method = _isArray(structure) ? _map : _mapValues;
 	return method(structure, val => {
 		if (val instanceof Definition) {
-			return getReference(container, val)
+			return getReference(container, val);
 		}
 
 		if (typeof val !== 'object') {

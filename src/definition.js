@@ -225,5 +225,6 @@ Definition.structure = function (structure) {
 
 Definition.self = function () {
 	return new SelfDefinition();
-}
+};
+
 module.exports = Definition;

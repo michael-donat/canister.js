@@ -1,8 +1,9 @@
+const path = require('path');
 const _mapValues = require('lodash.mapvalues');
-const _isArray = require('lodash.isarray');
 const _map = require('lodash.map');
 const Definition = require('./definition');
-const path = require('path');
+
+const _isArray = Array.isArray;
 
 module.exports = class Parser {
 	constructor(dictionary, basePath) {
@@ -11,7 +12,6 @@ module.exports = class Parser {
 	}
 
 	__parseReference(v) {
-
 		if (v === '@canister') {
 			return Definition.self();
 		}
@@ -65,7 +65,7 @@ module.exports = class Parser {
 			return modulePath;
 		}
 
-		return path.join(this.basePath, modulePath.replace(/^__/, ''))
+		return path.join(this.basePath, modulePath.replace(/^__/, ''));
 	}
 
 	* parse() {
