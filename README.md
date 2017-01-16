@@ -205,6 +205,23 @@ components:
 By using tags you can dynamically modify definitions held by the builder before the container is built. 
 This allows for 'dynamic' service composition as illustrated by [this](examples/tagging) example. 
 
+### Exposing canister.js from within another library
+
+If you are developig a library or framework that can expose canister.js for further configuration, you need to ensure that the components
+pulled in via your configuration come from your library node modules and not from the implementing project.
+
+You will need to provide a second parameter to the parser which is a basePath and your components need to provide relative path to node_modules starting with `__/`
+
+```
+const parser = new canister.Parser(yamlLoader.toJS(), __dirname);
+
+components:
+	express:
+		module: __/node_modules/express
+```
+
+You can then expose alternative loader and parser for the implementing application.
+
 ## Usage
 
 One the container is built, it will be frozen so no further modifications are possible.

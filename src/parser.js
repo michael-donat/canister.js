@@ -2,10 +2,12 @@ const _mapValues = require('lodash.mapvalues');
 const _isArray = require('lodash.isarray');
 const _map = require('lodash.map');
 const Definition = require('./definition');
+const path = require('path');
 
 module.exports = class Parser {
-	constructor(dictionary) {
+	constructor(dictionary, basePath) {
 		this.dictionary = dictionary;
+		this.basePath = basePath;
 	}
 
 	__parseReference(v) {
@@ -54,6 +56,18 @@ module.exports = class Parser {
 		});
 	}
 
+	__getPath(modulePath) {
+		if (!this.basePath) {
+			return modulePath;
+		}
+
+		if (!/^__/.test(modulePath)) {
+			return modulePath;
+		}
+
+		return path.join(this.basePath, modulePath.replace(/^__/, ''))
+	}
+
 	* parse() {
 		for (let id in this.dictionary.parameters) {
 			if (Object.prototype.hasOwnProperty.call(this.dictionary.parameters, id)) {
@@ -68,11 +82,11 @@ module.exports = class Parser {
 				let value = this.dictionary.components[id];
 				if (value.module) {
 					let {module} = value;
-					yieldValue = Definition.module(id, module);
+					yieldValue = Definition.module(id, this.__getPath(module));
 				}
 				if (value.property) {
 					let [, module, prop] = value.property.match(/(.*?)::(.*)/);
-					yieldValue = Definition.property(id, prop, module);
+					yieldValue = Definition.property(id, prop, this.__getPath(module));
 				}
 				if (value.class) {
 					let match = value.class.match(/(.*?)::(.*)/);
@@ -83,7 +97,7 @@ module.exports = class Parser {
 						[, module, klass] = match;
 					}
 
-					let definition = Definition.class(id, klass, module, Boolean(value.transient));
+					let definition = Definition.class(id, klass, this.__getPath(module), Boolean(value.transient));
 					if (value.with) {
 						definition.constructWith(...this.__parseArgs(value.with));
 					}
@@ -106,7 +120,7 @@ module.exports = class Parser {
 						[, module, method] = match;
 					}
 
-					yieldValue = Definition.factory(id, method, module, Boolean(value.transient), ...this.__parseArgs(value.with));
+					yieldValue = Definition.factory(id, method, this.__getPath(module), Boolean(value.transient), ...this.__parseArgs(value.with));
 				}
 
 				if (value.tags) {
