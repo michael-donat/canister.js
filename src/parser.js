@@ -6,8 +6,7 @@ const Definition = require('./definition');
 const _isArray = Array.isArray;
 
 module.exports = class Parser {
-	constructor(dictionary, basePath) {
-		this.dictionary = dictionary;
+	constructor(basePath) {
 		this.basePath = basePath;
 	}
 
@@ -68,18 +67,18 @@ module.exports = class Parser {
 		return path.join(this.basePath, modulePath.replace(/^__/, ''));
 	}
 
-	* parse() {
-		for (let id in this.dictionary.parameters) {
-			if (Object.prototype.hasOwnProperty.call(this.dictionary.parameters, id)) {
-				let value = this.dictionary.parameters[id];
+	* parse(dictionary) {
+		for (let id in dictionary.parameters) {
+			if (Object.prototype.hasOwnProperty.call(dictionary.parameters, id)) {
+				let value = dictionary.parameters[id];
 				yield Definition.parameter(id, value);
 			}
 		}
 
-		for (var id in this.dictionary.components) {
-			if (Object.prototype.hasOwnProperty.call(this.dictionary.components, id)) {
+		for (var id in dictionary.components) {
+			if (Object.prototype.hasOwnProperty.call(dictionary.components, id)) {
 				let yieldValue = null;
-				let value = this.dictionary.components[id];
+				let value = dictionary.components[id];
 				if (value.module) {
 					let {module} = value;
 					yieldValue = Definition.module(id, this.__getPath(module));

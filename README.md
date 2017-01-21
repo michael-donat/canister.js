@@ -14,15 +14,27 @@ yarn add canister.js
 npm install --save canister.js
 ```
 
+## Changes from version 1.7.x
+
+The parser now accepts dictionary on each parse call rather than on construction. If you used the default bootstrap then there's no changes to be made, if you decided to assemble the container yourself you will need to adjust.
+
 ## Usage
 
 Canister.js provides a simplistic bootstrap method as its default export, it will take a path to yaml config as well as the root dir of your modules (or assume `process.cwd()` if not provided). 
 
 ```node
-const container = require('canister.js')(
+const canister = require('canister.js')(
   './path/to/my/config.yml',
   __dirname
-).build();
+);
+
+if(process.env.NODE_ENV === 'test') {
+  canister.configure('./test.services.yml'); //load test mocks	
+}
+
+canister.env(); //load environment overrides
+
+const container = canister.build();
 
 container.get('reference');
 
@@ -35,12 +47,18 @@ const canister = require('canister.js');
 const moduleLoader = new canister.ModuleLoader(__dirname);
 const builder = new canister.Builder(moduleLoader);
 const yamlLoader = new canister.definitionLoader.YAML();
+const envLoader = new canister.definitionLoader.Environment();
 
 yamlLoader.fromFile('./path/to/my/config.yml');
+envLoader.load();
 
-const parser = new canister.Parser(yamlLoader.toJS());
+const parser = new canister.Parser();
 
-for (let definition of parser.parse()) {
+for (let definition of parser.parse(yamlLoader.toJS())) {
+  builder.addDefinition(definition);
+}
+
+for (let definition of parser.parse(envLoader.toJS())) {
   builder.addDefinition(definition);
 }
 
@@ -217,10 +235,38 @@ const parser = new canister.Parser(yamlLoader.toJS(), __dirname);
 
 components:
 	express:
-		module: __/node_modules/express
+		module: __/src/logger
 ```
 
 You can then expose alternative loader and parser for the implementing application.
+
+### Loading environment variables
+
+You can use the supplied environment loader during container build, this method is available via both the simplistic bootstrap and manual assembly (check examples above).
+
+By default the env loader will load all variables starting with `CONFIG_` prefix, lowercasing all keys and replacing `__` with `.`. Since environment variables are all strings the default config for this loader will cast them to the 'nearest' type. Example below:
+
+```
+process.env.CONFIG_A=1                 ==> {a: 1}
+process.env.CONFIG_B='1'               ==> {b: 1}
+process.env.CONFIG_C='1e1'             ==> {c: 10} // watch out on this one, it will also take bi/oct/hex notations
+process.env.CONFIG_D='true'            ==> {d: true}
+process.env.CONFIG_E='false'           ==> {e: false}
+process.env.CONFIG_F='abc'             ==> {f: 'abc}
+process.env.CONFIG_G__H__I_J='abc'     ==> {'g.h.u_j': 'abc}
+```
+
+This behaviour can be controlled by configuring env loader according to below interface:
+
+```
+envLoader.load({
+	prefix: RegExp,
+	getKey: fn(key, prefix) : string,
+	castValue: fn(value) : mixed
+});
+```
+
+Environment loader **can only load parameters**, not components. 
 
 ## Usage
 

@@ -38,6 +38,19 @@ describe('Container', function() {
 	it('can freeze itself', function() {
 		this.container.lock();
 
-		expect(this.container).to.be.locked;
+		expect(this.container).to.be.frozen;
+		expect(this.container.registry).to.be.frozen;
+	});
+
+	it('does not allow changes after freezing', function() {
+		this.container.lock();
+
+		this.container.a = 1;
+		this.container.registry.a = 1;
+
+		expect(this.container.a).to.not.exist;
+		expect(this.container.registry.a).to.not.exist;
+
+		expect(()=>this.container.register(1,1)).to.throw(/is locked/)
 	})
 })

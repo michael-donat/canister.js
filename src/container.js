@@ -27,6 +27,7 @@ module.exports = class Container {
 
 	lock() {
 		Object.freeze(this);
+		Object.freeze(this.registry);
 	}
 
 };

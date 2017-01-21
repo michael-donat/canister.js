@@ -129,10 +129,6 @@ class ClassDefinition extends DefinitionWithCalls {
 	}
 }
 
-Definition.prototype.isReference = function () {
-	return this instanceof ReferenceDefinition;
-};
-
 Definition.prototype.isStructure = function () {
 	return this instanceof StructureDefinition;
 };

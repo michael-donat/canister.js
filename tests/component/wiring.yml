@@ -1,6 +1,8 @@
 parameters:
   my.parameter: parameterValue
   my.object: {param: 'objectParamValue'}
+  override: override
+  nested_a_bit.override: override
 components:
   my.module: {module: ./fixture}
   my.property: {property: ./fixture::A}

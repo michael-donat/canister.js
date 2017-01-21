@@ -22,7 +22,8 @@ const ExportClass = class {
 const stubMap = {
 	'test.class': testClassModule,
 	'export.class': ExportClass,
-	'function.module': functionModule
+	'function.module': functionModule,
+	'property.module': {}
 }
 
 class StubLoader {
@@ -302,5 +303,55 @@ describe('Builder', function() {
 		this.builder.addDefinition(definition);
 
 		expect(this.builder.getDefinitionsByTag('tag')).to.eql([definition]);
+	});
+
+	it('passes container if @canister defined as argument', function() {
+		functionModule.A = sinon.stub();
+		functionModule.B = sinon.stub();
+
+		const definitionA = Definition.factory(
+			'function.moduleA', 'A', 'function.module', false,
+			Definition.self()
+		);
+
+		const definitionB = Definition.factory(
+			'function.moduleB', 'B', 'function.module', false,
+			Definition.structure({a: Definition.self()})
+		);
+
+		this.builder.addDefinition(definitionA);
+		this.builder.addDefinition(definitionB);
+
+		const container = this.builder.build();
+
+		expect(functionModule.A).to.have.been.calledWith(container);
+		expect(functionModule.B).to.have.been.calledWith({a: container});
+	})
+
+	it('only allows non value definitions to be added', function() {
+
+		expect(()=>this.builder.addDefinition('not a def')).to.throw(/instance of Definition/)
+		expect(()=>this.builder.addDefinition(Definition.value(1))).to.throw('Unexpected instance of value definition')
+
+	})
+
+	it('throws when a module property is undefined', function() {
+		this.builder.addDefinition(Definition.property('a', 'invalid', 'property.module'));
+
+		expect(()=>this.builder.build()).to.throw(/locate property/);
+	})
+
+	it('throws when it cannot find property module', function() {
+		this.builder = new Builder({loadModule() {throw new Error()}});
+		this.builder.addDefinition(Definition.property('a', 'invalid', 'property.module.invalid'));
+
+		expect(()=>this.builder.build()).to.throw(/load module/);
+	})
+
+	it('throws when it cannot load module', function() {
+		this.builder = new Builder({loadModule() {throw new Error()}});
+		this.builder.addDefinition(Definition.module('a', 'property.module.invalid'));
+
+		expect(()=>this.builder.build()).to.throw(/load module/);
 	})
 })

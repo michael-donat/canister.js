@@ -17,4 +17,16 @@ describe('Loader', function() {
 	it('knows paths relative to defined root', function() {
 		expect(this.loader.path('./loader.spec.js')).to.equal(path.join(__dirname, 'loader.spec.js'));
 	});
+
+	it('loads node modules', function() {
+		expect(this.loader.loadModule('http')).to.equal(require('http'));
+	});
+
+	it('loads relative modules', function() {
+		expect(this.loader.loadModule('./loader.spec.js')).to.equal(require(__filename));
+	});
+
+	it('loads local node modules', function() {
+		expect(this.loader.loadModule('mocha')).to.equal(require('mocha'));
+	});
 })

@@ -99,9 +99,6 @@ module.exports = class Builder extends EventEmitter {
 		if (definition.isValue()) {
 			throw new Error('Unexpected instance of value definition');
 		}
-		if (this.definitions[definition.id]) {
-			throw new Error(`Duplicate definition '${definition.id}'`);
-		}
 		this.definitions[definition.id] = definition;
 	}
 
