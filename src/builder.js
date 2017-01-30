@@ -253,7 +253,11 @@ module.exports = class Builder extends EventEmitter {
 		const container = new Container();
 
 		this.cycles.forEach(cycle => {
-			cycle.execute(this);
+			if (cycle.execute) {
+				cycle.execute(this);
+			} else {
+				cycle(this);
+			}
 		});
 
 		const graph = this.__buildGraph();
