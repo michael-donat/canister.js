@@ -1,5 +1,14 @@
-# Canister.js [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)]() [![Build Status](https://img.shields.io/travis/michael-donat/canister.js.svg?style=flat-square)](https://travis-ci.org/michael-donat/canister.js)
- 
+# Canister.js  
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/michael-donat/canister.js/master/logo.jpg" alt="canister.js"/>
+</p>
+
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)]()
+[![Build Status](https://img.shields.io/travis/michael-donat/canister.js.svg?style=flat-square)](https://travis-ci.org/michael-donat/canister.js)
+[![Dependencies](https://img.shields.io/david/michael-donat/canister.js.svg?style=flat-square)](https://david-dm.org/michael-donat/canister.js)
+[![Dependencies](https://img.shields.io/coveralls/michael-donat/canister.js.svg?style=flat-square)](https://coveralls.io/github/michael-donat/canister.js)
+
 Heavily inspired by [Symfony Dependency Injecion Component](https://symfony.com/doc/current/components/dependency_injection.html)
  
 ## Requirements
@@ -281,5 +290,3 @@ All contributions are more than welcome. Fork and PR not forgetting about lintin
 ## License
 
 MIT
-
-
