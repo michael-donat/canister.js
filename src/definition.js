@@ -18,6 +18,10 @@ class Definition {
 		return this._tags;
 	}
 
+	getTag(tagName) {
+		return this._tags.filter(t => tagName === t.name).pop();
+	}
+
 	addTag(tag) {
 		if (!(tag instanceof Tag)) {
 			throw new Error(`Expected an instance of Tag but got '${typeof (tag)}'`);

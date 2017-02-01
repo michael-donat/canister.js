@@ -10,7 +10,7 @@ module.exports = class Container {
 
 		const component = this.registry[name];
 
-		return component.__canisterBuilderProxy ? component(this) : component;
+		return component && component.__canisterBuilderProxy ? component(this) : component;
 	}
 
 	register(name, value) {
