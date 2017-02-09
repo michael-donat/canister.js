@@ -1,6 +1,6 @@
 {
   "name": "canister.js",
-  "version": "1.7.3",
+  "version": "1.7.4",
   "description": "A nodejs Dependency Injection Container implementation.",
   "main": "index.js",
   "directories": {
