@@ -5,7 +5,11 @@ const merge = require('merge');
 module.exports = class YamlLoader {
 	constructor() {
 		this.dictionary = {};
-		this.merge = merge.recursive.bind(false, this.dictionary);
+	}
+
+	merge(definitions) {
+		this.dictionary.parameters = merge(true, this.dictionary.parameters, definitions.parameters);
+		this.dictionary.components = merge(true, this.dictionary.components, definitions.components);
 	}
 
 	fromFile(filePath) {
