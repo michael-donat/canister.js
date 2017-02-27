@@ -13,26 +13,24 @@ module.exports = class EnvironmentLoader {
 			return key.replace(prefix, '').toLowerCase().split('__').join('.');
 		},
 		castValue = value => {
-			if (value === "true") {
+			if (value === 'true') {
 				return true;
 			}
-			if (value === "false") {
+			if (value === 'false') {
 				return false;
 			}
 			if (isNaN(value)) {
 				return value;
 			}
-			return +value; //cast to number
+			return Number(value).valueOf();
 		}
 	} = {}) {
-
 		Object.keys(this.config).forEach(key => {
 			if (!prefix.test(key)) {
 				return;
 			}
 			this.dictionary[getKey(key, prefix)] = castValue(this.config[key]);
-		})
-
+		});
 	}
 
 	toJS() {

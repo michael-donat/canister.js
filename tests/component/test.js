@@ -6,13 +6,21 @@ const classFixture = require('./class');
 describe('Canister.js', function() {
 	it('can build container from yml config file', function() {
 
+		const injectedComponent = String('ABC');
+		const injectedParameter = 12398;
+
+
 		const moduleLoader = new canister.ModuleLoader(__dirname);
 		const builder = new canister.Builder(moduleLoader);
 		const yamlLoader = new canister.definitionLoader.YAML();
 		const envLoader = new canister.definitionLoader.Environment({CONFIG_OVERRIDE: 1, CONFIG_NESTED_A_BIT__OVERRIDE: 2});
+		const valueLoader = new canister.definitionLoader.Value();
+
 
 		yamlLoader.fromFile(path.join(__dirname, './wiring.yml'));
 		envLoader.load();
+		valueLoader.parameter('injected.parameter', injectedParameter);
+		valueLoader.component('injected.component', injectedComponent);
 
 		const parser = new canister.Parser();
 
@@ -21,6 +29,10 @@ describe('Canister.js', function() {
 		}
 
 		for (let definition of parser.parse(envLoader.toJS())) {
+			builder.addDefinition(definition);
+		}
+
+		for (let definition of parser.parse(valueLoader.toJS())) {
 			builder.addDefinition(definition);
 		}
 
@@ -84,5 +96,8 @@ describe('Canister.js', function() {
 
 		expect(container.get('override')).to.be.eql(1);
 		expect(container.get('nested_a_bit.override')).to.be.eql(2);
+
+		expect(container.get('injected.component')).to.be.equal(injectedComponent);
+		expect(container.get('injected.parameter')).to.be.equal(injectedParameter);
 	})
 })

@@ -39,7 +39,8 @@ canister.Parser = require('./src/parser');
 canister.ModuleLoader = require('./src/loader');
 canister.definitionLoader = {
 	YAML: require('./src/definition-loader/yaml'),
-	Environment: require('./src/definition-loader/env')
+	Environment: require('./src/definition-loader/env'),
+	Value: require('./src/definition-loader/value')
 };
 
 module.exports = canister;

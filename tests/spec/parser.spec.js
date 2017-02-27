@@ -270,7 +270,7 @@ describe('Parser', function() {
 		const compare = Definition.class('my.class', 'B', 'lib/smth', false);
 
 		expect(definition).to.be.eql(compare);
-	})
+	});
 
 	it('parses references to container', function() {
 		const parser = new Parser('/basePath');
@@ -288,5 +288,21 @@ describe('Parser', function() {
 		compare.constructWith(Definition.self());
 
 		expect(definition).to.be.eql(compare);
-	})
+	});
+
+	it('parses injected values as parameters', function() {
+		const parser = new Parser();
+
+		const definition = parser.parse({
+			components: { 'my.injected': {
+				value: parser,
+			}}
+		}).next().value;
+
+		expect(definition).to.be.an.instanceOf(Definition);
+
+		const compare = Definition.parameter('my.injected', parser);
+
+		expect(definition).to.be.eql(compare);
+	});
 });

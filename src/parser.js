@@ -79,6 +79,11 @@ module.exports = class Parser {
 			if (Object.prototype.hasOwnProperty.call(dictionary.components, id)) {
 				let yieldValue = null;
 				let value = dictionary.components[id];
+
+				if (value.value) {
+					yieldValue = Definition.parameter(id, value.value);
+				}
+
 				if (value.module) {
 					let {module} = value;
 					yieldValue = Definition.module(id, this.__getPath(module));
