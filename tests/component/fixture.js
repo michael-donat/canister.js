@@ -22,3 +22,16 @@ module.exports.TaggedClass = class {
 module.exports.factoryFunction = function(...args) {
 	return {args, id: uuid.v1()};
 }
+
+module.exports.nested = {
+	nestedFactoryFunction(...args) {
+		return {args};
+	},
+	SomeClass: module.exports.SomeClass
+}
+
+module.exports.D = {
+	a: {
+		b: 1
+	}
+}

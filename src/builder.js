@@ -9,6 +9,10 @@ const Definition = require('./definition');
 
 const _isArray = Array.isArray;
 
+function getProperty(path, object) {
+	return _get(object, path);
+}
+
 function getReference(container, argDefinition) {
 	if (argDefinition.isSelf()) {
 		return container;
@@ -107,12 +111,12 @@ module.exports = class Builder extends EventEmitter {
 		let method;
 		let call = definition.calls[0];
 
-		if (call.method && !loadedModule[call.method]) {
+		if (call.method && !getProperty(call.method, loadedModule)) {
 			throw new Error(`Can't find factory method '${call.method}' in module '${definition.module}' for definition '${definition.id}'`);
 		}
 
 		if (call.method) {
-			method = loadedModule[call.method];
+			method = getProperty(call.method, loadedModule);
 		}
 
 		let getParams = () => [];
@@ -150,7 +154,7 @@ module.exports = class Builder extends EventEmitter {
 		let Klass = loadedModule;
 
 		if (definition.class) {
-			Klass = loadedModule[definition.class];
+			Klass = getProperty(definition.class, loadedModule);
 		}
 
 		if (!Klass) {
@@ -298,7 +302,7 @@ module.exports = class Builder extends EventEmitter {
 						throw error;
 					}
 
-					let property = loadedModule[definition.property];
+					let property = getProperty(definition.property, loadedModule);
 
 					if (property === undefined) {
 						throw new Error(`Can't locate property '${definition.property}' from module '${definition.module}' for definition '${definition.id}'`);

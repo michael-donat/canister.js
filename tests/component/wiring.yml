@@ -1,11 +1,15 @@
 parameters:
   my.parameter: parameterValue
-  my.object: {param: 'objectParamValue'}
+  my.object:
+    param: 'objectParamValue'
+  my.nesting:
+    a: { b: 1 }
   override: override
   nested_a_bit.override: override
 components:
   my.module: {module: ./fixture}
   my.property: {property: ./fixture::A}
+  my.deep.property: {property: ./fixture::D.a.b}
   my.property.class: {property: ./fixture::SomeClass }
   my.singleton:
     class: ./fixture::SomeClass
@@ -65,11 +69,20 @@ components:
     with:
       - {prop: '@my.parameter', more: { param: '@my.parameter' }}
   my.nested.factory:
-    class: ./fixture::factoryFunction
+    factory: ./fixture::factoryFunction
     with:
       - {prop: '@my.parameter', more: { param: '@my.parameter' }}
+  my.double.nested.factory:
+    factory: ./fixture::nested.nestedFactoryFunction
+    with:
+      - 1
+      - '@my.parameter'
   my.prop.reference:
     class: ./fixture::SomeClass
     with:
       - '@my.object::param'
+      - '@my.nesting::a.b'
+
+  my.nested.class: {class: ./fixture::nested.SomeClass }
+
 

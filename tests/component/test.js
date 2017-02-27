@@ -40,7 +40,10 @@ describe('Canister.js', function() {
 
 		expect(container.get('my.parameter')).to.equal('parameterValue');
 		expect(container.get('my.module')).to.equal(fixtures);
+
 		expect(container.get('my.property')).to.equal(fixtures.A);
+
+		expect(container.get('my.deep.property')).to.equal(fixtures.D.a.b);
 
 		const singleton = container.get('my.singleton');
 
@@ -78,6 +81,9 @@ describe('Canister.js', function() {
 		expect(container.get('my.factory.function').args).to.be.eql([1, 'parameterValue']);
 		expect(container.get('my.factory.function')).to.be.equal(container.get('my.factory.function'))
 
+		expect(container.get('my.double.nested.factory').args).to.be.eql([1, 'parameterValue']);
+		expect(container.get('my.double.nested.factory')).to.be.equal(container.get('my.double.nested.factory'));
+
 		expect(container.get('my.factory')).to.be.eql([2, 'prop.A.value']);
 
 		expect(container.get('my.transient.factory')).to.not.be.equal(
@@ -92,12 +98,14 @@ describe('Canister.js', function() {
 			prop: 'parameterValue', more: {param: 'parameterValue'}
 		}]);
 
-		expect(container.get('my.prop.reference').args).to.be.eql(['objectParamValue']);
+		expect(container.get('my.prop.reference').args).to.be.eql(['objectParamValue', 1]);
 
 		expect(container.get('override')).to.be.eql(1);
 		expect(container.get('nested_a_bit.override')).to.be.eql(2);
 
 		expect(container.get('injected.component')).to.be.equal(injectedComponent);
 		expect(container.get('injected.parameter')).to.be.equal(injectedParameter);
+
+		expect(container.get('my.nested.class')).to.be.an.instanceOf(fixtures.nested.SomeClass);
 	})
 })

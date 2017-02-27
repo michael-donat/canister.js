@@ -100,7 +100,7 @@ components:
 
 ```yml
 components:
-  my.module.property: { property: './module::PropertyName' }
+  my.module.property: { property: './module::PropertyPath.PropertyName' }
   my.node.property:
     property: 'path::join'
 ```
