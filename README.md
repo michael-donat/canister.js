@@ -128,10 +128,10 @@ components:
   my.class:
     class: ./module::ClassName
     with:
-      - first argument
+    - first argument
+    - 2
+    - - 1
       - 2
-      - - 1
-        - 2
 ```
 
 Above will result in an invocation equivalent to `new require('./module').ClassName)('first argument', 2, [1, 2])`.
@@ -146,8 +146,8 @@ components:
   my.factory:
     factory: './module::factoryFunction'
     with:
-     - first argument
-     - 2
+    - first argument
+    - 2
   my.instances:
     factory: './module::factoryFunction'
     transient: true
@@ -160,10 +160,10 @@ components:
   my.class:
     class: ./module::ClassName
     call:
-      - method: setValue
-        with:
-          - key
-          - value
+    - method: setValue
+      with:
+      - key
+      - value
 ```
 
 ### Referencing other components
@@ -177,11 +177,11 @@ components:
   db.connection:
     class: ./db
     with:
-      - '@db.host'
+     - '@db.host'
   user.repository:
     class: ./repository::User
     with:
-      - '@db.connection'
+    - '@db.connection'
 ```
 
 Canister will build components using an order obtained from dependency graph, if cyclic dependency is detected it will fail hard during build phase.
@@ -198,20 +198,20 @@ components:
     property: './package.json::name'
   logger:
     factory: 'bunyan::createLogger'
-	with:
-      - {name: '@name'}
+    with:
+    - {name: '@name'}
 ```
 
 Much better:
 
 ```yml
 components:
-	pkg: 
-		module: './package.json'
-	logger:
-	 	factory: 'bunyan::createLogger'
-	 	with:
-	 		- {name: '@pkg::name'}
+  pkg: 
+    module: './package.json'
+  logger:
+    factory: 'bunyan::createLogger'
+    with:
+    - {name: '@pkg::name'}
 ```
 
 ### Referencing the container itself
@@ -243,8 +243,8 @@ You will need to provide a second parameter to the parser which is a basePath an
 const parser = new canister.Parser(yamlLoader.toJS(), __dirname);
 
 components:
-	express:
-		module: __/src/logger
+  express:
+    module: __/src/logger
 ```
 
 You can then expose alternative loader and parser for the implementing application.
@@ -267,7 +267,7 @@ process.env.CONFIG_G__H__I_J='abc'     ==> {'g.h.u_j': 'abc}
 
 This behaviour can be controlled by configuring env loader according to below interface:
 
-```
+```node
 envLoader.load({
 	prefix: RegExp,
 	getKey: fn(key, prefix) : string,
