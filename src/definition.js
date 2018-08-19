@@ -61,14 +61,14 @@ class DefinitionWithCalls extends Definition {
 		return this._calls;
 	}
 
-	addCall(call) {
+	addCall(call, unshift = false) {
 		if (!(call instanceof Call)) {
 			throw new Error(`Expected an instance of Call but got '${typeof (call)}'`);
 		}
 		if (!this._calls) {
 			this._calls = [];
 		}
-		this._calls.push(call);
+		unshift ? this._calls.unshift(call) : this._calls.push(call)
 	}
 }
 
